@@ -2,31 +2,23 @@ package org.cuieney.videolife.ui.adapter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.support.v4.util.TimeUtils;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
-
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseRecycerViewAdapter;
 import org.cuieney.videolife.common.image.ImageLoader;
 import org.cuieney.videolife.common.utils.DateUtil;
-import org.cuieney.videolife.entity.VideoListBean;
+import org.cuieney.videolife.entity.VideoListItemBean;
 import org.cuieney.videolife.entity.kaiyanBean.DataBean;
-import org.cuieney.videolife.entity.kaiyanBean.ItemListBean;
+import org.cuieney.videolife.entity.kaiyanBean.YoutubeItemListBean;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -34,19 +26,19 @@ import java.util.concurrent.Executors;
  * Created by cuieney on 17/2/24.
  */
 
-public class VideoAdapter extends BaseRecycerViewAdapter<ItemListBean, RecyclerView.ViewHolder> {
+public class VideoAdapter extends BaseRecycerViewAdapter<VideoListItemBean, RecyclerView.ViewHolder> {
 
     public List<Bitmap> mBitmap;
     private ExecutorService fixedThreadPool = Executors.newFixedThreadPool(5);
 
-    public VideoAdapter(Context context, List<ItemListBean> list) {
+    public VideoAdapter(Context context, List<VideoListItemBean> list) {
         super(context, list);
         mBitmap = new ArrayList<>();
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (list.get(position).getType().equals("video")) {
+        if (list.size() > position) {
             if (position == 0) {
                 return R.layout.top_item;
             }
@@ -67,13 +59,15 @@ public class VideoAdapter extends BaseRecycerViewAdapter<ItemListBean, RecyclerV
 
     @Override
     public void getBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
-        ItemListBean itemListBean = list.get(position);
+        VideoListItemBean itemListBean = list.get(position);
         if (holder instanceof MyHolder) {
             MyHolder myHolder = (MyHolder) holder;
             ViewCompat.setTransitionName(myHolder.imageView, String.valueOf(position) + "_image");
-            DataBean data = itemListBean.getData();
-            ImageLoader.loadAll(context, data.getCover().getDetail(), myHolder.imageView);
-
+            if (itemListBean.getNormalThumbnailUrl() != null) {
+                ImageLoader.loadAll(context, itemListBean.getNormalThumbnailUrl(), myHolder.imageView);
+            }  else {
+                myHolder.imageView.setImageResource(R.drawable.mask);
+            }
 
             myHolder.itemView.setOnClickListener(v -> {
                 if (mClickListener != null) {
@@ -82,13 +76,13 @@ public class VideoAdapter extends BaseRecycerViewAdapter<ItemListBean, RecyclerV
             });
 
 
-            myHolder.textView.setText(data.getTitle());
+            myHolder.textView.setText(itemListBean.getTitle());
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("#").append(data.getCategory())
+            stringBuilder.append("#").append(itemListBean.getCategory())
                     .append(" ")
                     .append(" / ")
                     .append(" ")
-                    .append(DateUtil.formatTime2(data.getDuration()));
+                    .append(DateUtil.convertDuration(itemListBean.getDuration()));
             myHolder.description.setText(stringBuilder.toString());
         }
     }

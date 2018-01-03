@@ -17,6 +17,12 @@
             android:layout_width="match_parent"
             android:layout_height="170dp"
             android:scaleType="centerCrop" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="170dp"
+            android:background="@drawable/mask"
+            />
+
 
         <TextView
             android:id="@+id/title"

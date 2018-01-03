@@ -8,6 +8,7 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,14 +18,14 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.jaeger.library.StatusBarUtil;
 import com.konifar.fab_transformation.FabTransformation;
 
 import org.cuieney.videolife.R;
-import org.cuieney.videolife.common.image.ImageLoader;
-import org.cuieney.videolife.common.utils.DateUtil;
-import org.cuieney.videolife.common.utils.LogUtil;
-import org.cuieney.videolife.entity.kaiyanBean.DataBean;
 import org.cuieney.videolife.common.base.BaseBackFragment;
+import org.cuieney.videolife.common.image.ImageLoader;
+import org.cuieney.videolife.common.utils.LogUtil;
+import org.cuieney.videolife.entity.VideoListItemBean;
 import org.cuieney.videolife.ui.video.JumpUtils;
 
 
@@ -43,11 +44,11 @@ public class VideoDetailFragment extends BaseBackFragment {
     FloatingActionButton mFab;
 
 
-    private DataBean dataBean;
+    private VideoListItemBean dataBean;
     private CollapsingToolbarLayout collToolBar;
 
 
-    public static VideoDetailFragment newInstance(DataBean dataBean) {
+    public static VideoDetailFragment newInstance(VideoListItemBean dataBean) {
 
         Bundle args = new Bundle();
         args.putParcelable(ARG_ITEM, dataBean);
@@ -61,6 +62,7 @@ public class VideoDetailFragment extends BaseBackFragment {
         super.onCreate(savedInstanceState);
         dataBean = getArguments().getParcelable(ARG_ITEM);
     }
+
 
     @Nullable
     @Override
@@ -85,15 +87,15 @@ public class VideoDetailFragment extends BaseBackFragment {
 
         mToolbar.setTitle("");
         initToolbarNav(mToolbar);
-        ImageLoader.loadAll(getActivity(), dataBean.getCover().getDetail(), mImgDetail);
-        ImageLoader.loadAll(getActivity(), dataBean.getCover().getBlurred(), bgImage);
+        ImageLoader.loadAll(getActivity(), dataBean.getMaxThumbnailUrl(), mImgDetail);
+
         title.setText(dataBean.getTitle());
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("#").append(dataBean.getCategory())
                 .append(" ")
                 .append(" / ")
                 .append(" ")
-                .append(DateUtil.formatTime2(dataBean.getDuration()));
+                .append(dataBean.getDuration());
         type.setText(stringBuilder.toString());
         description.setText(dataBean.getDescription());
 
@@ -120,7 +122,7 @@ public class VideoDetailFragment extends BaseBackFragment {
 
     private void initColor() {
 
-        Glide.with(getContext()).load(dataBean.getCover().getBlurred()).asBitmap().into(new SimpleTarget<Bitmap>() {
+        Glide.with(getContext()).load(dataBean.getMaxThumbnailUrl()).asBitmap().into(new SimpleTarget<Bitmap>() {
             @Override
             public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
 
@@ -131,6 +133,7 @@ public class VideoDetailFragment extends BaseBackFragment {
                         LogUtil.d(e.getMessage());
                     }
                     collToolBar.setContentScrimColor(color);
+                    StatusBarUtil.setColor(getActivity(), color);
                     mFab.setBackgroundTintList(new ColorStateList(new int[][]{new int[0]}, new int[]{color}));
 
                 });

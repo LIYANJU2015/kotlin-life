@@ -19,7 +19,7 @@ public abstract class BaseBackFragment extends SupportFragment {
         toolbar.setNavigationOnClickListener(v -> {
             _mActivity.onBackPressed();
         });
-        toolbar.inflateMenu(R.menu.video_menu);
+//        toolbar.inflateMenu(R.menu.video_menu);
     }
 
     @Override

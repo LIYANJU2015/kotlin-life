@@ -11,6 +11,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
+    <com.ashokvarma.bottomnavigation.BottomNavigationBar
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom"
+        android:id="@+id/bottom_navigation_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -30,7 +37,7 @@
             app:floatingSearch_searchBarMarginLeft="8dp"
             app:floatingSearch_searchBarMarginTop="8dp"
             app:floatingSearch_searchBarMarginRight="8dp"
-            app:floatingSearch_leftActionMode="showHamburger"
+            app:floatingSearch_leftActionMode="showSearch"
             app:floatingSearch_menu="@menu/search_menu"
             app:floatingSearch_close_search_on_keyboard_dismiss="true"/>
 
@@ -38,12 +45,5 @@
 
 
 
-
-    <com.ashokvarma.bottomnavigation.BottomNavigationBar
-        android:layout_alignParentBottom="true"
-        android:layout_gravity="bottom"
-        android:id="@+id/bottom_navigation_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
 
 </android.support.design.widget.CoordinatorLayout>

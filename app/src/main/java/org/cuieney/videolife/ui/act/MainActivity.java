@@ -1,11 +1,12 @@
 package org.cuieney.videolife.ui.act;
 
-import android.app.Activity;
 import android.graphics.Color;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.arlib.floatingsearchview.FloatingSearchView;
+import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
 import com.jaeger.library.StatusBarUtil;
@@ -14,14 +15,12 @@ import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseMainFragment;
 import org.cuieney.videolife.common.base.SimpleActivity;
 import org.cuieney.videolife.common.component.EventUtil;
-import org.cuieney.videolife.common.utils.DelegatesExt;
-import org.cuieney.videolife.kotlin.App;
-import org.cuieney.videolife.kotlin.ui.fragment.video.VideoHomeFragment;
 import org.cuieney.videolife.ui.fragment.essay.EssayFragment;
 import org.cuieney.videolife.ui.fragment.music.MusicFragment;
+import org.cuieney.videolife.ui.fragment.newstand.NewstandFragment;
 import org.cuieney.videolife.ui.fragment.video.VideoFragment;
+import org.cuieney.videolife.ui.fragment.video.VideoHomeFragment;
 import org.greenrobot.eventbus.Subscribe;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,12 +49,21 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
     }
 
     @Override
+    public void onBackPressedSupport() {
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            pop();
+        } else {
+            finish();
+        }
+    }
+
+    @Override
     protected void initEventAndData() {
         mFragments = new ArrayList<>();
         mFragments.add(new VideoHomeFragment());
         mFragments.add(MusicFragment.newInstance());
         mFragments.add(new EssayFragment());
-        mFragments.add(VideoFragment.newInstance());
+        mFragments.add(NewstandFragment.newInstance());
         loadMultipleRootFragment(R.id.act_container, 0
                 , mFragments.get(0)
                 , mFragments.get(1)
@@ -71,12 +79,27 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
                 Log.i("MainActivity", "onFragmentSupportVisible--->" + fragment.getClass().getSimpleName());
             }
         });
+
+
+        mSearchView.setOnSearchListener(new FloatingSearchView.OnSearchListener() {
+            @Override
+            public void onSuggestionClicked(SearchSuggestion searchSuggestion) {
+
+            }
+
+            @Override
+            public void onSearchAction(String currentQuery) {
+                Toast.makeText(getApplication(), " currentQuery " + currentQuery, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
+    public static int sCurrentStatusColor = Color.parseColor("#6c4a41");
 
     private void initView() {
         mNavigationView
-                .addItem(new BottomNavigationItem(R.drawable.movie_icon, "movie").setActiveColor("#6c4a41").setInActiveColor("#CCCCCC"))
+                .addItem(new BottomNavigationItem(R.drawable.movie_icon, "movie").setActiveColor("#6c4a41")
+                        .setInActiveColor("#CCCCCC"))
                 .addItem(new BottomNavigationItem(R.drawable.music_icon, "music").setActiveColor("#008867"))
                 .addItem(new BottomNavigationItem(R.drawable.book_icon, "essay").setActiveColor("#8b6b64"))
                 .addItem(new BottomNavigationItem(R.drawable.newspaper_icon, "newstand").setActiveColor("#485A66"))
@@ -91,18 +114,20 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
                 showHideFragment(mFragments.get(position));
                 switch (position) {
                     case 0:
-                        StatusBarUtil.setColor(MainActivity.this, Color.parseColor("#6c4a41"));
+                        sCurrentStatusColor = Color.parseColor("#6c4a41");
                         break;
                     case 1:
-                        StatusBarUtil.setColor(MainActivity.this, Color.parseColor("#008867"));
+                        sCurrentStatusColor = Color.parseColor("#008867");
                         break;
                     case 2:
-                        StatusBarUtil.setColor(MainActivity.this, Color.parseColor("#8b6b64"));
+                        sCurrentStatusColor = Color.parseColor("#8b6b64");
                         break;
                     case 3:
-                        StatusBarUtil.setColor(MainActivity.this, Color.parseColor("#485A66"));
+                        sCurrentStatusColor = Color.parseColor("#485A66");
                         break;
                 }
+
+                StatusBarUtil.setColor(MainActivity.this, sCurrentStatusColor);
             }
 
             @Override

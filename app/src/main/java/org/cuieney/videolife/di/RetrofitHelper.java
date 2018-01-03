@@ -1,9 +1,14 @@
 package org.cuieney.videolife.di;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import org.cuieney.videolife.common.api.OpApiService;
 import org.cuieney.videolife.common.api.UrlManager;
-import org.cuieney.videolife.common.api.KyApiService;
-import org.cuieney.videolife.common.api.WyApiService;
+import org.cuieney.videolife.common.api.VideoService;
+import org.cuieney.videolife.common.api.SoundCloudApiService;
+import org.cuieney.videolife.entity.YouTubeListBean;
+import org.cuieney.videolife.entity.YoutubeSnippetDeserializer;
 
 import javax.inject.Inject;
 
@@ -11,7 +16,6 @@ import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
-import rx.Observable;
 
 /**
  * Created by cuieney on 17/2/28.
@@ -21,8 +25,8 @@ public class RetrofitHelper {
 
     OkHttpClient client;
 
-    private KyApiService kyApiService;
-    private WyApiService wyApiService;
+    private VideoService kyApiService;
+    private SoundCloudApiService wyApiService;
     private OpApiService opApiService;
 
     @Inject
@@ -32,26 +36,36 @@ public class RetrofitHelper {
     }
 
     private void init() {
-        kyApiService = getApiService(UrlManager.KAIYAN_HOST,KyApiService.class);
-        wyApiService = getApiService(UrlManager.WANGYI_HOST,WyApiService.class);
+        kyApiService = getApiService(UrlManager.YOUTUBE_HOST,VideoService.class);
+        wyApiService = getApiService(UrlManager.SOUNDCLOUD_HOST,SoundCloudApiService.class);
         opApiService = getApiService(UrlManager.YIREN_HOST,OpApiService.class);
 
     }
     private <T> T getApiService(String baseUrl, Class<T> clz) {
+        GsonConverterFactory gsonConverterFactory;
+        if (UrlManager.YOUTUBE_HOST.equals(baseUrl)) {
+            GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.registerTypeAdapter(YouTubeListBean.class, new YoutubeSnippetDeserializer());
+            Gson gson = gsonBuilder.create();
+            gsonConverterFactory = GsonConverterFactory.create(gson);
+        } else {
+            gsonConverterFactory = GsonConverterFactory.create();
+        }
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(gsonConverterFactory)
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
         return retrofit.create(clz);
     }
 
-    public KyApiService getKyApiService() {
+    public VideoService getKyApiService() {
         return kyApiService;
     }
 
-    public WyApiService getWyApiService(){
+    public SoundCloudApiService getWyApiService(){
         return wyApiService;
     }
 

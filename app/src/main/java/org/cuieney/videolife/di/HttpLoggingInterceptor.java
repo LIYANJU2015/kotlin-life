@@ -1,7 +1,5 @@
 package org.cuieney.videolife.di;
 
-import android.util.Log;
-
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -18,8 +16,6 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import okhttp3.internal.Platform;
-import okhttp3.internal.http.HttpEngine;
 import okio.Buffer;
 import okio.BufferedSource;
 
@@ -97,7 +93,7 @@ public final class HttpLoggingInterceptor implements Interceptor {
         /** A {@link Logger} defaults output appropriate for the current platform. */
         Logger DEFAULT = new Logger() {
             @Override public void log(String message) {
-                Platform.get().log(message);
+//                Platform.get().log(message);
             }
         };
     }
@@ -217,9 +213,10 @@ public final class HttpLoggingInterceptor implements Interceptor {
                 logger.log(headers.name(i) + ": " + headers.value(i));
             }
 
-            if (!logBody || !HttpEngine.hasBody(response)) {
-                logger.log("<-- END HTTP");
-            } else if (bodyEncoded(response.headers())) {
+//            if (!logBody || !Http.hasBody(response)) {
+//                logger.log("<-- END HTTP");
+//            } else
+                if (bodyEncoded(response.headers())) {
                 logger.log("<-- END HTTP (encoded body omitted)");
             } else {
                 BufferedSource source = responseBody.source();

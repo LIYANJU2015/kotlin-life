@@ -3,7 +3,6 @@ package org.cuieney.videolife.presenter.contract;
 import org.cuieney.videolife.common.base.BasePresenter;
 import org.cuieney.videolife.common.base.BaseView;
 import org.cuieney.videolife.entity.MusicListBean;
-import org.cuieney.videolife.entity.VideoListBean;
 
 import java.util.List;
 
@@ -18,7 +17,7 @@ public interface MusicHomeContract {
     }
 
     interface Presenter extends BasePresenter<MusicHomeContract.View> {
-        void getMusicData(String date);
+        void getMusicData();
 
     }
 }

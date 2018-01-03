@@ -7,6 +7,9 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.transition.Fade;
 import android.transition.Slide;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseFragment;
@@ -33,8 +36,12 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
     RecyclerView recycler;
     @BindView(R.id.refresh)
     SwipeRefreshLayout refresh;
+    @BindView(R.id.loading_mb)
+    ProgressBar loadingPB;
+    @BindView(R.id.error_tv)
+    TextView errorTv;
+
     private List<MusicListBean> mMusicList;
-    private int pager = 1;
     private MusicAdapter adapter;
 
     public static MusicHomeFragment newInstance() {
@@ -57,15 +64,15 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
     protected void initEventAndData() {
 
         refresh.setProgressViewOffset(false,100,200);
-        refresh.setOnRefreshListener(() -> mPresenter.getMusicData("1"));
+        refresh.setOnRefreshListener(() -> mPresenter.getMusicData());
         GridLayoutManager layout = new GridLayoutManager(getActivity(), 2);
         recycler.setLayoutManager(layout);
-        recycler.addOnScrollListener(new EndLessOnScrollListener(layout,1) {
-            @Override
-            public void onLoadMore() {
-                mPresenter.getMusicData(pager+"");
-            }
-        });
+//        recycler.addOnScrollListener(new EndLessOnScrollListener(layout,1) {
+//            @Override
+//            public void onLoadMore() {
+//                mPresenter.getMusicData(pager+"");
+//            }
+//        });
         mMusicList = new ArrayList<>();
         adapter = new MusicAdapter(getActivity(),mMusicList);
         recycler.setAdapter(adapter);
@@ -73,23 +80,25 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
             startChildFragment(mMusicList.get(position), vh);
         });
 
-        mPresenter.getMusicData(pager+"");
+        loadingPB.setVisibility(View.VISIBLE);
+        mPresenter.getMusicData();
     }
 
     @Override
     public void showContent(List<MusicListBean> musicListBean) {
-        musicListBean.add(0,new MusicListBean());
-        musicListBean.add(0,new MusicListBean());
+        loadingPB.setVisibility(View.GONE);
+        errorTv.setVisibility(View.GONE);
+
+//        musicListBean.add(0,new MusicListBean());
+//        musicListBean.add(0,new MusicListBean());
         if (refresh.isRefreshing()) {
             refresh.setRefreshing(false);
-            pager =1;
             adapter.clear();
             mMusicList.clear();
             adapter.addAll(musicListBean);
             recycler.setAdapter(adapter);
         }else{
             adapter.addAll(musicListBean);
-            pager++;
         }
         mMusicList.addAll(musicListBean);
     }
@@ -123,6 +132,8 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
 
     @Override
     public void error(Throwable throwable) {
-
+        throwable.printStackTrace();
+        loadingPB.setVisibility(View.GONE);
+        errorTv.setVisibility(View.VISIBLE);
     }
 }

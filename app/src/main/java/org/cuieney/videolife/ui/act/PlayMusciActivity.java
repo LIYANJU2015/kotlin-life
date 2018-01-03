@@ -1,6 +1,7 @@
 package org.cuieney.videolife.ui.act;
 
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.ViewPager;
@@ -14,6 +15,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import org.cuieney.videolife.R;
+import org.cuieney.videolife.common.api.SoundCloudApiService;
 import org.cuieney.videolife.common.base.SimpleActivity;
 import org.cuieney.videolife.entity.MusicListBean;
 import org.cuieney.videolife.entity.wyBean.TracksBean;
@@ -24,8 +26,6 @@ import java.util.List;
 import java.util.Random;
 
 import butterknife.BindView;
-import tv.danmaku.ijk.media.player.IMediaPlayer;
-import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
 
 /**
@@ -68,7 +68,7 @@ public class PlayMusciActivity extends SimpleActivity {
     private MusicListBean tracksBean;
     private List<TracksBean> nowPlayList;
     private CoverFlowAdapter adapter;
-    private IjkMediaPlayer player;
+    private MediaPlayer player;
 
     private int playerIndex = 0;
     public Handler mHandler;
@@ -92,21 +92,21 @@ public class PlayMusciActivity extends SimpleActivity {
     }
 
     private void initMeida() {
-        player = new IjkMediaPlayer();
+        player = new MediaPlayer();
         player.reset();
-        player.setOnPreparedListener(iMediaPlayer -> {
-            iMediaPlayer.start();
+        player.setOnPreparedListener(MediaPlayer -> {
+            player.start();
             mStart.setText("00:00");
-            mEnd.setText(DateUtils.formatElapsedTime(iMediaPlayer.getDuration() / 1000));
+            mEnd.setText(DateUtils.formatElapsedTime(player.getDuration() / 1000));
         });
-        player.setOnErrorListener((iMediaPlayer, i, i1) -> {
-            iMediaPlayer.pause();
+        player.setOnErrorListener((MediaPlayer, i, i1) -> {
+            player.pause();
             return false;
         });
-        player.setOnCompletionListener(iMediaPlayer -> {
+        player.setOnCompletionListener(MediaPlayer -> {
             changeMusic();
         });
-        player.setOnSeekCompleteListener(IMediaPlayer::start);
+        player.setOnSeekCompleteListener(MediaPlayer::start);
         playMusic();
     }
 
@@ -134,7 +134,8 @@ public class PlayMusciActivity extends SimpleActivity {
     private void playMusic() {
         try {
             player.reset();
-            player.setDataSource(nowPlayList.get(playerIndex).getFilename());
+            player.setDataSource(nowPlayList.get(playerIndex).getFilename()
+                    + "?client_id=" + SoundCloudApiService.CLIENT_ID);
             player.prepareAsync();
         } catch (IOException e) {
             e.printStackTrace();
@@ -157,7 +158,7 @@ public class PlayMusciActivity extends SimpleActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 double time = player.getDuration() * (seekBar.getProgress() * 0.01);
-                player.seekTo((long) time);
+                player.seekTo((int) time);
             }
         });
         mPlayPause.setOnClickListener(v -> {
@@ -201,10 +202,12 @@ public class PlayMusciActivity extends SimpleActivity {
                     mHandler.postDelayed(this, 1000);
                 }
                 runOnUiThread(() -> {
-                    if (player != null) {
+                    if (player != null && player.isPlaying()) {
                         int progress = (int) ((player.getCurrentPosition() * 1f / player.getDuration() * 1f) * 100);
-                        mSeekbar.setProgress(progress);
-                        mStart.setText(DateUtils.formatElapsedTime(player.getCurrentPosition() / 1000));
+                        if (mSeekbar != null && mStart != null) {
+                            mSeekbar.setProgress(progress);
+                            mStart.setText(DateUtils.formatElapsedTime(player.getCurrentPosition() / 1000));
+                        }
                     }
                 });
             }

@@ -60,4 +60,8 @@
     <string name="label_play">Play</string>
     <string name="label_previous">Previous</string>
     <string name="label_next">Next</string>
+
+    <string name="error_text">NO Result</string>
+    <string name="action_voice_rec">Voice</string>
+    <string name="error_player">There was an error initializing the YouTubePlayer (%1$s)</string>
 </resources>

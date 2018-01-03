@@ -3,8 +3,6 @@ package org.cuieney.videolife.entity.kaiyanBean;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.cuieney.videolife.entity.VideoListBean;
-
 import java.util.List;
 
 /**

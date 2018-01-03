@@ -3,9 +3,9 @@ package org.cuieney.videolife.di.component;
 
 import android.content.Context;
 
-import org.cuieney.videolife.common.api.KyApiService;
+import org.cuieney.videolife.common.api.VideoService;
 import org.cuieney.videolife.common.api.OpApiService;
-import org.cuieney.videolife.common.api.WyApiService;
+import org.cuieney.videolife.common.api.SoundCloudApiService;
 import org.cuieney.videolife.di.module.AppModule;
 import org.cuieney.videolife.di.module.RetrofitModule;
 
@@ -21,7 +21,7 @@ import dagger.Component;
 @Component(modules = {AppModule.class, RetrofitModule.class})
 public interface AppComponent {
     Context getContext();
-    KyApiService getKyApiService();
-    WyApiService getWyApiService();
+    VideoService getKyApiService();
+    SoundCloudApiService getWyApiService();
     OpApiService getOpApiService();
 }

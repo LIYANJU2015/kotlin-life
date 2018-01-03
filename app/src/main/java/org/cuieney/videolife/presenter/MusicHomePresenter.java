@@ -1,6 +1,6 @@
 package org.cuieney.videolife.presenter;
 
-import org.cuieney.videolife.common.api.WyApiService;
+import org.cuieney.videolife.common.api.SoundCloudApiService;
 import org.cuieney.videolife.common.base.RxPresenter;
 import org.cuieney.videolife.common.utils.RxUtil;
 import org.cuieney.videolife.presenter.contract.MusicHomeContract;
@@ -14,16 +14,16 @@ import rx.Subscription;
  */
 
 public class MusicHomePresenter extends RxPresenter<MusicHomeContract.View> implements MusicHomeContract.Presenter {
-    private WyApiService mRetrofitHelper;
+    private SoundCloudApiService mRetrofitHelper;
 
     @Inject
-    public MusicHomePresenter(WyApiService mRetrofitHelper) {
+    public MusicHomePresenter(SoundCloudApiService mRetrofitHelper) {
         this.mRetrofitHelper = mRetrofitHelper;
     }
 
     @Override
-    public void getMusicData(String pagerNo) {
-        Subscription rxSubscription = mRetrofitHelper.getMusicList(pagerNo)
+    public void getMusicData() {
+        Subscription rxSubscription = mRetrofitHelper.getMusicList()
                 .compose(RxUtil.rxSchedulerHelper())
                 .subscribe(musicListBean -> {
                     mView.showContent(musicListBean);

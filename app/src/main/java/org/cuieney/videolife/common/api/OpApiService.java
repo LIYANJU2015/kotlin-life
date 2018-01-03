@@ -2,7 +2,7 @@ package org.cuieney.videolife.common.api;
 
 import org.cuieney.videolife.entity.EssayDetailBean;
 import org.cuieney.videolife.entity.EssayListBean;
-import org.cuieney.videolife.entity.VideoListBean;
+
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;

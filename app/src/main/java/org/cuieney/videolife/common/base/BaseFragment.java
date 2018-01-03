@@ -8,11 +8,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.jaeger.library.StatusBarUtil;
+
 import org.cuieney.videolife.App;
 import org.cuieney.videolife.common.utils.LogUtil;
 import org.cuieney.videolife.di.component.DaggerFragmentComponent;
 import org.cuieney.videolife.di.component.FragmentComponent;
 import org.cuieney.videolife.di.module.FragmentModule;
+import org.cuieney.videolife.ui.act.MainActivity;
 import org.cuieney.videolife.ui.fragment.video.VideoFragment;
 
 import javax.inject.Inject;
@@ -82,9 +85,12 @@ import me.yokeyword.fragmentation.SupportFragment;
      @Override
      public void onHiddenChanged(boolean hidden) {
          super.onHiddenChanged(hidden);
+         LogUtil.d("onHiddenChanged hidden " + hidden);
          if (!isInited && !hidden) {
              isInited = true;
              initEventAndData();
+         } else {
+             StatusBarUtil.setColor(getActivity(), MainActivity.sCurrentStatusColor);
          }
      }
 

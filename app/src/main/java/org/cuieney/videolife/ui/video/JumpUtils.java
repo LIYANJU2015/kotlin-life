@@ -10,7 +10,10 @@ import android.view.View;
 
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.entity.MusicListBean;
+import org.cuieney.videolife.entity.VideoListItemBean;
+import org.cuieney.videolife.entity.YouTubeListBean;
 import org.cuieney.videolife.entity.kaiyanBean.DataBean;
+import org.cuieney.videolife.entity.kaiyanBean.YoutubeItemListBean;
 import org.cuieney.videolife.ui.act.PlayActivity;
 import org.cuieney.videolife.ui.act.PlayMusciActivity;
 
@@ -27,7 +30,7 @@ public class JumpUtils {
      * @param activity
      * @param view
      */
-    public static void goToVideoPlayer(Activity activity, View view, DataBean dataBean) {
+    public static void goToVideoPlayer(Activity activity, View view, VideoListItemBean dataBean) {
         Intent intent = new Intent(activity, PlayActivity.class);
         Bundle bundle = new Bundle();
         bundle.putParcelable(PlayActivity.DATA,dataBean);

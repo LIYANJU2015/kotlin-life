@@ -5,18 +5,19 @@ import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.transition.Fade;
 import android.transition.Slide;
 import android.util.Log;
-
-import com.jcodecraeer.xrecyclerview.XRecyclerView;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseFragment;
 import org.cuieney.videolife.common.component.EventUtil;
-import org.cuieney.videolife.common.utils.LogUtil;
 import org.cuieney.videolife.entity.VideoListBean;
-import org.cuieney.videolife.entity.kaiyanBean.ItemListBean;
+import org.cuieney.videolife.entity.VideoListItemBean;
 import org.cuieney.videolife.presenter.VideoHomePresenter;
 import org.cuieney.videolife.presenter.contract.VideoHomeContract;
 import org.cuieney.videolife.ui.adapter.VideoAdapter;
@@ -38,10 +39,15 @@ public class VideoHomeFragment extends BaseFragment<VideoHomePresenter> implemen
     RecyclerView recycler;
     @BindView(R.id.refresh)
     SwipeRefreshLayout refresh;
+    @BindView(R.id.loading_mb)
+    ProgressBar loadingPB;
+    @BindView(R.id.error_tv)
+    TextView errorTv;
 
-    private String date;
     private VideoAdapter adapter;
-    private List<ItemListBean> mVideoListBean;
+    private static List<VideoListItemBean> sVideoListBean = new ArrayList<>();
+
+    private static String sNextPageToken = "";
 
     public static VideoHomeFragment newInstance() {
         Bundle bundle = new Bundle();
@@ -65,50 +71,60 @@ public class VideoHomeFragment extends BaseFragment<VideoHomePresenter> implemen
 
         refresh.setProgressViewOffset(false, 100, 200);
         refresh.setOnRefreshListener(() -> {
-            mPresenter.getVideoData("");
+            mPresenter.getVideoData(sNextPageToken);
         });
 
         LinearLayoutManager layout = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         recycler.setLayoutManager(layout);
-        mVideoListBean = new ArrayList<>();
 
-        adapter = new VideoAdapter(getActivity(), mVideoListBean);
-        adapter.setOnItemClickListener((position, view, vh) -> startChildFragment(mVideoListBean.get(position), (VideoAdapter.MyHolder) vh));
+        adapter = new VideoAdapter(getActivity(), sVideoListBean);
+        adapter.setOnItemClickListener((position, view, vh) -> startChildFragment(sVideoListBean.get(position), (VideoAdapter.MyHolder) vh));
         recycler.setAdapter(adapter);
         recycler.addOnScrollListener(new EndLessOnScrollListener(layout,0) {
             @Override
             public void onLoadMore() {
-                mPresenter.getVideoData(date);
+                if (sNextPageToken == null) {
+                    return;
+                }
+                mPresenter.getVideoData(sNextPageToken);
             }
         });
-        mPresenter.getVideoData("");
 
+        if (sVideoListBean.size() == 0) {
+            mPresenter.getVideoData(sNextPageToken);
+
+            loadingPB.setVisibility(View.VISIBLE);
+            errorTv.setVisibility(View.GONE);
+        }
     }
 
     @Override
     public void showContent(VideoListBean videoListBean) {
+        loadingPB.setVisibility(View.GONE);
+        errorTv.setVisibility(View.GONE);
+
+        if (TextUtils.isEmpty((String)videoListBean.getNextPage())) {
+            sNextPageToken = null;
+        } else {
+            sNextPageToken = (String)videoListBean.getNextPage();
+        }
+
         if (refresh.isRefreshing()) {
             refresh.setRefreshing(false);
-            mVideoListBean.clear();
+            sVideoListBean.clear();
             adapter.clear();
             adapter.addAll(videoListBean.getItemList());
             recycler.setAdapter(adapter);
         }else{
             adapter.addAll(videoListBean.getItemList());
         }
-        mVideoListBean.addAll(videoListBean.getItemList());
-
-        int end = videoListBean.getNextPageUrl().lastIndexOf("&num");
-        int start = videoListBean.getNextPageUrl().lastIndexOf("date=");
-        date = videoListBean.getNextPageUrl().substring(start + 5, end);
-
-
-
+        sVideoListBean.addAll(videoListBean.getItemList());
     }
-    private void startChildFragment(ItemListBean videoListBean, VideoAdapter.MyHolder vh) {
+
+    private void startChildFragment(VideoListItemBean videoListBean, VideoAdapter.MyHolder vh) {
         EventUtil.sendEvent(true + "");
         VideoDetailFragment fragment = VideoDetailFragment.newInstance(
-                videoListBean.getData());
+                videoListBean);
         // 这里是使用SharedElement的用例
 
         // LOLLIPOP(5.0)系统的 SharedElement支持有 系统BUG， 这里判断大于 > LOLLIPOP
@@ -131,5 +147,7 @@ public class VideoHomeFragment extends BaseFragment<VideoHomePresenter> implemen
     @Override
     public void error(Throwable throwable) {
         Log.e("oye", "error: ", throwable);
+        loadingPB.setVisibility(View.GONE);
+        errorTv.setVisibility(View.VISIBLE);
     }
 }
