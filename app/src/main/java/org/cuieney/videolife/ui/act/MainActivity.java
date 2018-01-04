@@ -12,12 +12,15 @@ import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
 import com.jaeger.library.StatusBarUtil;
+import com.rating.RatingActivity;
 
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseMainFragment;
 import org.cuieney.videolife.common.base.SimpleActivity;
 import org.cuieney.videolife.common.component.EventUtil;
 import org.cuieney.videolife.common.utils.LogUtil;
+import org.cuieney.videolife.common.utils.PreferenceUtil;
+import org.cuieney.videolife.common.utils.Utils;
 import org.cuieney.videolife.presenter.contract.MusicHomeContract;
 import org.cuieney.videolife.presenter.contract.VideoHomeContract;
 import org.cuieney.videolife.ui.fragment.music.MusicFragment;
@@ -195,9 +198,38 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
             public void onTabReselected(int position) {
             }
         });
-
+        isShowRating = PreferenceUtil.getInstance(this).isShowRating();
     }
 
+    private boolean isShowRating = false;
+    private boolean isShow = false;
+
+    @Override
+    public void finish() {
+        if (isShow) {
+            return;
+        }
+
+        if (isShowRating) {
+            isShow = true;
+            Utils.runSingleThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    isShow = false;
+                    isShowRating = false;
+                    PreferenceUtil.getInstance(getApplicationContext()).notShowRating();
+                }
+            });
+            RatingActivity.launch(this);
+        } else {
+            super.finish();
+        }
+    }
 
     @Subscribe
     public void hide(String isHide) {

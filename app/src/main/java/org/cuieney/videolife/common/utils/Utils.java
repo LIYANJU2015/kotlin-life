@@ -20,6 +20,8 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import okio.ByteString;
 
@@ -28,6 +30,12 @@ import okio.ByteString;
  * Created by cuieney on 16/8/25.
  */
 public class Utils {
+
+    public static ExecutorService sExecutorService = Executors.newSingleThreadExecutor();
+
+    public static void runSingleThread(Runnable runnable) {
+        sExecutorService.execute(runnable);
+    }
 
     public static String basic(String userName, String password) {
         try {

@@ -27,6 +27,16 @@ public class PreferenceUtil {
 	return instance;
   }
 
+    public void notShowRating() {
+        final SharedPreferences.Editor editor = SP.edit();
+        editor.putBoolean("notShowRating", false);
+        editor.apply();
+    }
+
+    public boolean isShowRating() {
+        return SP.getBoolean("notShowRating", true);
+    }
+
   public SharedPreferences.Editor getEditor() {
 	return SP.edit();
   }
