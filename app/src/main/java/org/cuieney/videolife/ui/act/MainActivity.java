@@ -1,9 +1,11 @@
 package org.cuieney.videolife.ui.act;
 
+import android.content.Intent;
 import android.graphics.Color;
+import android.speech.RecognizerIntent;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
@@ -16,16 +18,17 @@ import org.cuieney.videolife.common.base.BaseMainFragment;
 import org.cuieney.videolife.common.base.SimpleActivity;
 import org.cuieney.videolife.common.component.EventUtil;
 import org.cuieney.videolife.common.utils.LogUtil;
+import org.cuieney.videolife.presenter.contract.MusicHomeContract;
 import org.cuieney.videolife.presenter.contract.VideoHomeContract;
-import org.cuieney.videolife.ui.fragment.essay.EssayFragment;
 import org.cuieney.videolife.ui.fragment.music.MusicFragment;
-import org.cuieney.videolife.ui.fragment.newstand.NewstandFragment;
+import org.cuieney.videolife.ui.fragment.music.MusicHomeFragment;
 import org.cuieney.videolife.ui.fragment.video.VideoFragment;
 import org.cuieney.videolife.ui.fragment.video.VideoHomeFragment;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import me.yokeyword.fragmentation.SupportFragment;
@@ -43,11 +46,42 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
     @BindView(R.id.bottom_navigation_bar)
     BottomNavigationBar mNavigationView;
 
+    private static final int VOICE_RECOGNITION_REQUEST_CODE = 111;
+
     List<SupportFragment> mFragments;
 
     @Override
     protected int getLayout() {
         return R.layout.design_layout;
+    }
+
+    private void startVoiceRecognitionActivity() {
+        try {
+            // 通过Intent传递语音识别的模式，开启语音
+            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            // 语言模式和自由模式的语音识别
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            // 提示语音开始
+            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getResources().getString(R.string.start_speech));
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault().getLanguage());
+            // 开始语音识别
+            startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == VOICE_RECOGNITION_REQUEST_CODE && resultCode == RESULT_OK) {
+            ArrayList<String> results = data
+                    .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+            if (results != null && results.size() > 0) {
+                doSearch(results.get(0));
+            }
+        }
     }
 
     @Override
@@ -73,7 +107,14 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
             }
         });
 
-
+        mSearchView.setOnMenuItemClickListener(new FloatingSearchView.OnMenuItemClickListener() {
+            @Override
+            public void onActionMenuItemSelected(MenuItem item) {
+                if (item.getItemId() == R.id.action_voice_rec) {
+                    startVoiceRecognitionActivity();
+                }
+            }
+        });
         mSearchView.setOnSearchListener(new FloatingSearchView.OnSearchListener() {
             @Override
             public void onSuggestionClicked(SearchSuggestion searchSuggestion) {
@@ -82,20 +123,38 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
 
             @Override
             public void onSearchAction(String currentQuery) {
-                Toast.makeText(getApplication(), " currentQuery " + currentQuery, Toast.LENGTH_LONG).show();
+                doSearch(currentQuery);
             }
         });
     }
 
-    public static int sCurrentStatusColor = Color.parseColor("#6c4a41");
+    private void doSearch(String query) {
+        LogUtil.d("onSearchAction currentType " + currentType);
+        if (currentType == MusicHomeContract.SEARCH_SOUDN_CLOUD_TYPE) {
+            SupportFragment supportFragment = mFragments.get(currentPostion);
+            if (supportFragment instanceof MusicFragment) {
+                ((MusicFragment)supportFragment).addSearchFragment(currentType, query);
+            }
+        } else {
+            SupportFragment supportFragment = mFragments.get(currentPostion);
+            if (supportFragment instanceof VideoFragment) {
+                ((VideoFragment)supportFragment).addSearchFragment(currentType, query);
+            }
+        }
+    }
+
+    public static int sCurrentStatusColor = Color.parseColor("#E64A19");
+
+    private int currentType = VideoHomeContract.SEARCH_YOUTUBE_TYPE;
+    private int currentPostion;
 
     private void initView() {
         mNavigationView
-                .addItem(new BottomNavigationItem(R.drawable.movie_icon, "movie").setActiveColor("#6c4a41")
+                .addItem(new BottomNavigationItem(R.drawable.youtube_icon, "YouTube").setActiveColor("#E64A19")
                         .setInActiveColor("#CCCCCC"))
-                .addItem(new BottomNavigationItem(R.drawable.music_icon, "music").setActiveColor("#008867"))
-                .addItem(new BottomNavigationItem(R.drawable.book_icon, "essay").setActiveColor("#8b6b64"))
-                .addItem(new BottomNavigationItem(R.drawable.newspaper_icon, "newstand").setActiveColor("#485A66"))
+                .addItem(new BottomNavigationItem(R.drawable.soundcloud_icon, "SoundCloud").setActiveColor("#f8600f"))
+                .addItem(new BottomNavigationItem(R.drawable.dailymotion_icon, "Dailymotion").setActiveColor("#1166dc"))
+                .addItem(new BottomNavigationItem(R.drawable.vimeo_icon, "Vimeo").setActiveColor("#01adef"))
                 .initialise();
         mNavigationView.setBackgroundStyle(BACKGROUND_STYLE_RIPPLE);
         mNavigationView.setMode(MODE_FIXED);
@@ -105,18 +164,23 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
             @Override
             public void onTabSelected(int position) {
                 showHideFragment(mFragments.get(position));
+                currentPostion = position;
                 switch (position) {
                     case 0:
-                        sCurrentStatusColor = Color.parseColor("#6c4a41");
+                        currentType = VideoHomeContract.SEARCH_YOUTUBE_TYPE;
+                        sCurrentStatusColor = Color.parseColor("#E64A19");
                         break;
                     case 1:
-                        sCurrentStatusColor = Color.parseColor("#008867");
+                        currentType = MusicHomeContract.SEARCH_SOUDN_CLOUD_TYPE;
+                        sCurrentStatusColor = Color.parseColor("#f8600f");
                         break;
                     case 2:
-                        sCurrentStatusColor = Color.parseColor("#8b6b64");
+                        currentType = VideoHomeContract.SEARCH_DAILYMOTION_TYPE;
+                        sCurrentStatusColor = Color.parseColor("#1166dc");
                         break;
                     case 3:
-                        sCurrentStatusColor = Color.parseColor("#485A66");
+                        currentType = VideoHomeContract.SEARCH_VIMEN_TYPE;
+                        sCurrentStatusColor = Color.parseColor("#01adef");
                         break;
                 }
 
@@ -140,8 +204,10 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
         LogUtil.d("hide isHide :" + isHide);
         if (isHide.equals("true")) {
             mSearchView.setVisibility(View.GONE);
+            mNavigationView.hide();
         } else {
             mSearchView.setVisibility(View.VISIBLE);
+            mNavigationView.show();
         }
     }
 

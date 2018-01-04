@@ -119,7 +119,6 @@ dependencies {
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
     testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
 
-    compile project(path: ':vrlib')
     //blockcanary
     compile 'com.github.markzhai:blockcanary-android:1.5.0'
     debugCompile 'com.github.markzhai:blockcanary-android:1.5.0'

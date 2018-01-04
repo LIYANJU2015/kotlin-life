@@ -38,7 +38,10 @@ public class YoutubeItemListBean extends VideoListItemBean implements Parcelable
 
     @Override
     public String getDuration() {
-        return DateUtil.convertDuration(contentDetails.duration);
+        if (contentDetails != null) {
+            return DateUtil.convertDuration(contentDetails.duration);
+        }
+        return "";
     }
 
     @Override

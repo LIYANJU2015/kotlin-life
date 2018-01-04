@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseMainFragment;
+import org.cuieney.videolife.ui.fragment.video.VideoHomeFragment;
 
 /**
  * Created by paohaile on 17/2/24.
@@ -15,11 +16,24 @@ import org.cuieney.videolife.common.base.BaseMainFragment;
 
 public class MusicFragment extends BaseMainFragment {
 
+    public static MusicFragment newInstance(int type, String query){
+        Bundle bundle = new Bundle();
+        bundle.putInt("type", type);
+        bundle.putString("query", query);
+        MusicFragment musicFragment = new MusicFragment();
+        musicFragment.setArguments(bundle);
+        return musicFragment;
+    }
+
     public static MusicFragment newInstance(){
         Bundle bundle = new Bundle();
         MusicFragment musicFragment = new MusicFragment();
         musicFragment.setArguments(bundle);
         return musicFragment;
+    }
+
+    public void addSearchFragment(int type, String query) {
+        loadRootFragment(R.id.fl_first_container, MusicHomeFragment.newInstance(type, query));
     }
 
     @Nullable
@@ -33,7 +47,8 @@ public class MusicFragment extends BaseMainFragment {
     public void onLazyInitView(@Nullable Bundle savedInstanceState) {
         super.onLazyInitView(savedInstanceState);
         if (savedInstanceState == null) {
-            loadRootFragment(R.id.fl_first_container, MusicHomeFragment.newInstance());
+            loadRootFragment(R.id.fl_first_container, MusicHomeFragment.newInstance(getArguments().getInt("type"),
+                    getArguments().getString("query")));
         }
     }
 }

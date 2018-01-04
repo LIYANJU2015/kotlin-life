@@ -19,7 +19,6 @@ import org.cuieney.videolife.presenter.MusicHomePresenter;
 import org.cuieney.videolife.presenter.contract.MusicHomeContract;
 import org.cuieney.videolife.ui.adapter.MusicAdapter;
 import org.cuieney.videolife.common.base.DetailTransition;
-import org.cuieney.videolife.ui.widget.EndLessOnScrollListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,12 +43,22 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
     private List<MusicListBean> mMusicList;
     private MusicAdapter adapter;
 
+    public static MusicHomeFragment newInstance(int type, String query) {
+        Bundle bundle = new Bundle();
+        bundle.putInt("type", type);
+        bundle.putString("query", query);
+        MusicHomeFragment musicHomeFragment = new MusicHomeFragment();
+        musicHomeFragment.setArguments(bundle);
+        return musicHomeFragment;
+    }
+
     public static MusicHomeFragment newInstance() {
         Bundle bundle = new Bundle();
         MusicHomeFragment musicHomeFragment = new MusicHomeFragment();
         musicHomeFragment.setArguments(bundle);
         return musicHomeFragment;
     }
+
     @Override
     protected void initInject() {
         getFragmentComponent().inject(this);
@@ -60,17 +69,34 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
         return R.layout.music_home_fragment;
     }
 
+    private int type;
+    private String query;
+
     @Override
     protected void initEventAndData() {
+        type = getArguments().getInt("type");
+        query = getArguments().getString("query");
 
         refresh.setProgressViewOffset(false,100,200);
-        refresh.setOnRefreshListener(() -> mPresenter.getMusicData());
+        refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if (type == MusicHomeContract.SEARCH_SOUDN_CLOUD_TYPE) {
+                    mPresenter.getSearchMusicList(query);
+                } else {
+                    mPresenter.getMusicData();
+                }
+            }
+        });
+
         GridLayoutManager layout = new GridLayoutManager(getActivity(), 2);
         recycler.setLayoutManager(layout);
 //        recycler.addOnScrollListener(new EndLessOnScrollListener(layout,1) {
 //            @Override
 //            public void onLoadMore() {
-//                mPresenter.getMusicData(pager+"");
+//                if (type == MusicHomeContract.Search_SOUDN_CLOUD_TYPE) {
+//                    mPresenter.getMusicData();
+//                }
 //            }
 //        });
         mMusicList = new ArrayList<>();
@@ -81,7 +107,13 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
         });
 
         loadingPB.setVisibility(View.VISIBLE);
-        mPresenter.getMusicData();
+
+        if (type == MusicHomeContract.SEARCH_SOUDN_CLOUD_TYPE) {
+            mPresenter.getSearchMusicList(query);
+        } else {
+            mPresenter.getMusicData();
+        }
+
     }
 
     @Override

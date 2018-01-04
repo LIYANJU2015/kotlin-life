@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Life</string>
+    <string name="app_name">Play Tube</string>
     <string name="image_transition">image_transition</string>
 
 
@@ -64,4 +64,6 @@
     <string name="error_text">NO Result</string>
     <string name="action_voice_rec">Voice</string>
     <string name="error_player">There was an error initializing the YouTubePlayer (%1$s)</string>
+
+    <string name="start_speech">Start speech</string>
 </resources>

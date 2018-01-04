@@ -22,6 +22,18 @@ public class MusicHomePresenter extends RxPresenter<MusicHomeContract.View> impl
     }
 
     @Override
+    public void getSearchMusicList(String query) {
+        Subscription rxSubscription = mRetrofitHelper.getSearchMusicList(query)
+                .compose(RxUtil.rxSchedulerHelper())
+                .subscribe(musicListBean -> {
+                    mView.showContent(musicListBean);
+                }, throwable -> {
+                    mView.error(throwable);
+                });
+        addSubscrebe(rxSubscription);
+    }
+
+    @Override
     public void getMusicData() {
         Subscription rxSubscription = mRetrofitHelper.getMusicList()
                 .compose(RxUtil.rxSchedulerHelper())

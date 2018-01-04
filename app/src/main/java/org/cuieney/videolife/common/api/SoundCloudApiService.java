@@ -7,6 +7,7 @@ import java.util.List;
 
 import retrofit2.http.GET;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 import rx.Observable;
 
 /**
@@ -17,6 +18,9 @@ public interface SoundCloudApiService {
 
     String CLIENT_ID = "LegNTza81OuwVaDfYELQW1X71tY1sot8";
 
-    @GET("playlists?client_id=" + CLIENT_ID)
+    @GET("playlists?limit=100&client_id=" + CLIENT_ID)
     Observable<List<MusicListBean>> getMusicList();
+
+    @GET("tracks?limit=100&client_id=" + CLIENT_ID)
+    Observable<List<MusicListBean>> getSearchMusicList(@Query("q") String query);
 }

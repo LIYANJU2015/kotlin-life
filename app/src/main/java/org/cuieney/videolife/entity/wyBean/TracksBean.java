@@ -16,6 +16,7 @@ public class TracksBean implements Parcelable {
     public String artwork_url;
     public long duration;
     public User user;
+    public String description;
 
     public int getId() {
         return id;

@@ -19,6 +19,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.gson.Gson;
+import com.jaeger.library.StatusBarUtil;
 import com.jcodecraeer.xrecyclerview.XRecyclerView;
 import com.konifar.fab_transformation.FabTransformation;
 import com.ms.square.android.expandabletextview.ExpandableTextView;
@@ -125,6 +126,7 @@ public class MusicDetailFragment extends BaseBackFragment {
                         LogUtil.d(e.getMessage());
                     }
                     collToolBar.setContentScrimColor(color);
+                    StatusBarUtil.setColor(getActivity(), color);
                     mFab.setBackgroundTintList(new ColorStateList(new int[][]{new int[0]}, new int[]{color}));
 
                 });

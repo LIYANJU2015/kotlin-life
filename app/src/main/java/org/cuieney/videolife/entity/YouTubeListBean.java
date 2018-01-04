@@ -16,11 +16,12 @@ public class YouTubeListBean extends VideoListBean {
     public String nextPageToken;
     public List<VideoListItemBean> itemList = new ArrayList<>();
 
-
-    public String getNextPageToken() {
+    @Override
+    public String getNextPage() {
         return nextPageToken;
     }
 
+    @Override
     public List<VideoListItemBean> getItemList() {
         return itemList;
     }

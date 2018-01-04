@@ -55,11 +55,21 @@ public class VideoHomeFragment extends BaseFragment<VideoHomePresenter> implemen
     private Object sNextPageToken;
 
     private int requestType = 0;
+    private String queryContent;
 
     public static VideoHomeFragment newInstance(int requestType) {
         Bundle bundle = new Bundle();
         VideoHomeFragment videoFragment = new VideoHomeFragment();
         bundle.putInt("request_type", requestType);
+        videoFragment.setArguments(bundle);
+        return videoFragment;
+    }
+
+    public static VideoHomeFragment newInstance(int requestType, String query) {
+        Bundle bundle = new Bundle();
+        VideoHomeFragment videoFragment = new VideoHomeFragment();
+        bundle.putInt("request_type", requestType);
+        bundle.putString("query", query);
         videoFragment.setArguments(bundle);
         return videoFragment;
     }
@@ -88,7 +98,11 @@ public class VideoHomeFragment extends BaseFragment<VideoHomePresenter> implemen
     @Override
     protected void initEventAndData() {
         requestType = getArguments().getInt("request_type", VideoHomeContract.YOUTUBE_TYPE);
-        if (sVideoMap.get(requestType) == null) {
+        queryContent = getArguments().getString("query", "");
+
+        if (requestType > VideoHomeContract.VIMEN_TYPE) {
+            sVideoListBean = new ArrayList<>();
+        } else if (sVideoMap.get(requestType) == null) {
             sVideoListBean = new ArrayList<>();
             VideoHomeBean videoHomeBean = new VideoHomeBean(sNextPageToken, sVideoListBean);
             sVideoMap.put(requestType, videoHomeBean);
@@ -101,7 +115,12 @@ public class VideoHomeFragment extends BaseFragment<VideoHomePresenter> implemen
 
         refresh.setProgressViewOffset(false, 100, 200);
         refresh.setOnRefreshListener(() -> {
-            mPresenter.getVideoData(sNextPageToken, requestType);
+            sNextPageToken = null;
+            if (requestType > VideoHomeContract.VIMEN_TYPE) {
+                mPresenter.searchVideoData(queryContent, sNextPageToken, requestType);
+            } else {
+                mPresenter.getVideoData(sNextPageToken, requestType);
+            }
         });
 
         LinearLayoutManager layout = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
@@ -117,12 +136,20 @@ public class VideoHomeFragment extends BaseFragment<VideoHomePresenter> implemen
                 if (sNextPageToken == null) {
                     return;
                 }
-                mPresenter.getVideoData(sNextPageToken, requestType);
+                if (requestType > VideoHomeContract.VIMEN_TYPE) {
+                    mPresenter.searchVideoData(queryContent, sNextPageToken, requestType);
+                } else {
+                    mPresenter.getVideoData(sNextPageToken, requestType);
+                }
             }
         });
 
         if (sVideoListBean.size() == 0) {
-            mPresenter.getVideoData(sNextPageToken, requestType);
+            if (requestType > VideoHomeContract.VIMEN_TYPE) {
+                mPresenter.searchVideoData(queryContent, sNextPageToken, requestType);
+            } else {
+                mPresenter.getVideoData(sNextPageToken, requestType);
+            }
 
             loadingPB.setVisibility(View.VISIBLE);
             errorTv.setVisibility(View.GONE);

@@ -20,7 +20,19 @@ public class MusicListBean implements Parcelable {
     private String title;
     private String description;
     private String artwork_url;
-    private List<TracksBean> tracks;
+    private List<TracksBean> tracks = new ArrayList<>();
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setArtwork_url(String artwork_url) {
+        this.artwork_url = artwork_url;
+    }
 
     public String getMname() {
         return title;

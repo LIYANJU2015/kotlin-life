@@ -19,7 +19,7 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.jaeger.library.StatusBarUtil;
 import com.konifar.fab_transformation.FabTransformation;
-import com.tubewebplayer.YouTubePlayerActivity;
+import com.tubewebplayer.WebViewPlayerActivity;
 
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseBackFragment;
@@ -111,11 +111,12 @@ public class VideoDetailFragment extends BaseBackFragment {
                     @Override
                     public void onEndTransform() {
                         if (dataBean instanceof DMVideoItemListBean) {
-                            JumpUtils.goToDMPlayer(getActivity(), mImgDetail, dataBean);
+                            WebViewPlayerActivity.launch(getContext(), "http://www.dailymotion.com/video/" + dataBean.getVideoId(),
+                                    dataBean.getTitle());
                         } else if (dataBean instanceof YoutubeItemListBean) {
                             JumpUtils.goToYoutubePlayer(getActivity(), mImgDetail, dataBean);
                         } else {
-                            YouTubePlayerActivity.launch(getActivity(), "https://vimeo.com/" + dataBean.getVideoId(),
+                            WebViewPlayerActivity.launch(getContext(), "https://vimeo.com/" + dataBean.getVideoId(),
                                     dataBean.getTitle());
                         }
                     }

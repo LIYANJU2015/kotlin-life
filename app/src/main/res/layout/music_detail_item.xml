@@ -37,11 +37,15 @@
                 android:ellipsize="end"
                 android:gravity="bottom"
                 android:singleLine="true"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:text="my_song my_songmy_songmy_songmy_songmy_songmy_songmy_songmy_song"
                 android:textColor="#191919"
                 android:textSize="12sp" />
 
             <TextView
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:id="@+id/title_dis"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

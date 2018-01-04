@@ -26,11 +26,21 @@ public class YoutubeSnippetDeserializer implements JsonDeserializer<YouTubeListB
             JsonObject item = jsonArray.get(i).getAsJsonObject();
             YoutubeItemListBean snippet = context.deserialize(item.get("snippet").getAsJsonObject(),
                     YoutubeItemListBean.class);
-            snippet.statistics = context.deserialize(item.get("statistics").getAsJsonObject(),
-                    YoutubeItemListBean.Statistics.class);
-            snippet.contentDetails = context.deserialize(item.get("contentDetails").getAsJsonObject(),
-                    YoutubeItemListBean.ContentDetails.class);
-            snippet.vid = item.get("id").getAsString();
+            if (item.has("statistics")) {
+                snippet.statistics = context.deserialize(item.get("statistics").getAsJsonObject(),
+                        YoutubeItemListBean.Statistics.class);
+            }
+            if (item.has("contentDetails")) {
+                snippet.contentDetails = context.deserialize(item.get("contentDetails").getAsJsonObject(),
+                        YoutubeItemListBean.ContentDetails.class);
+            }
+
+            if (item.get("id").isJsonObject()) {
+                snippet.vid = item.get("id").getAsJsonObject().get("videoId").getAsString();
+            } else {
+                snippet.vid = item.get("id").getAsString();
+            }
+
             youTubeVideos.itemList.add(snippet);
         }
         return youTubeVideos;

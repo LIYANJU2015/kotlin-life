@@ -17,4 +17,7 @@ public interface DailymotionService {
 
     @GET("videos")
     public Observable<DMVideosListBean> getVideos(@Query("page") int page, @QueryMap Map<String, String> options);
+
+    @GET("videos")
+    Observable<DMVideosListBean> getSearchVideos(@QueryMap Map<String, String> options, @Query("search") String search, @Query("page") int page);
 }

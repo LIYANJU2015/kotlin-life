@@ -12,10 +12,14 @@ import org.cuieney.videolife.common.api.SoundCloudApiService;
 import org.cuieney.videolife.common.utils.Utils;
 import org.cuieney.videolife.entity.DMVideosListBean;
 import org.cuieney.videolife.entity.DailymotionDeserializer;
+import org.cuieney.videolife.entity.MusicListBean;
+import org.cuieney.videolife.entity.SoundCloudDeserializer;
 import org.cuieney.videolife.entity.VimeoDeserializer;
 import org.cuieney.videolife.entity.VimeoListBean;
 import org.cuieney.videolife.entity.YouTubeListBean;
 import org.cuieney.videolife.entity.YoutubeSnippetDeserializer;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -65,9 +69,13 @@ public class RetrofitHelper {
             Gson gson = gsonBuilder.create();
             gsonConverterFactory = GsonConverterFactory.create(gson);
         } else if (UrlManager.VIMEO_URL.equals(baseUrl)) {
-
             GsonBuilder gsonBuilder = new GsonBuilder();
             gsonBuilder.registerTypeAdapter(VimeoListBean.class, new VimeoDeserializer());
+            Gson gson = gsonBuilder.create();
+            gsonConverterFactory = GsonConverterFactory.create(gson);
+        }else if (UrlManager.SOUNDCLOUD_HOST.equals(baseUrl)) {
+            GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.registerTypeAdapter(MusicListBean.class, new SoundCloudDeserializer());
             Gson gson = gsonBuilder.create();
             gsonConverterFactory = GsonConverterFactory.create(gson);
         }else {

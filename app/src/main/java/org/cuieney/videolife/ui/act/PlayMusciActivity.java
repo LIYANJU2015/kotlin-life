@@ -143,6 +143,19 @@ public class PlayMusciActivity extends SimpleActivity {
     }
 
     private void initListener() {
+        share.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Intent share_intent = new Intent();
+                share_intent.setAction(Intent.ACTION_SEND);
+                share_intent.setType("text/plain");
+                share_intent.putExtra(Intent.EXTRA_SUBJECT, tracksBean.getMname());
+                share_intent.putExtra(Intent.EXTRA_TEXT, tracksBean.getMdesc());
+                //创建分享的Dialog
+                share_intent = Intent.createChooser(share_intent, "Share");
+                startActivity(share_intent);
+            }
+        });
         back.setOnClickListener(v -> finish());
         mSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override

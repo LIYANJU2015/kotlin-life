@@ -19,9 +19,15 @@ public interface VideoHomeContract {
     int YOUTUBE_TYPE = 1;
     int DAILYMOTION_TYPE = 2;
     int VIMEN_TYPE = 3;
+    int SEARCH_YOUTUBE_TYPE = 4;
+    int SEARCH_DAILYMOTION_TYPE = 5;
+    int SEARCH_VIMEN_TYPE = 6;
 
     interface Presenter extends BasePresenter<View> {
+
         void getVideoData(Object nextPage, int requstType);
+
+        void searchVideoData(String query, Object nextPage, int searchType);
 
     }
 }
