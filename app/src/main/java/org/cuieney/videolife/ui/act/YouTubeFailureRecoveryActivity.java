@@ -8,7 +8,7 @@ import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 
 import org.cuieney.videolife.R;
-import org.cuieney.videolife.common.api.VideoService;
+import org.cuieney.videolife.common.api.YoutubeService;
 
 /**
  * Created by liyanju on 2018/1/3.
@@ -35,7 +35,7 @@ public abstract class YouTubeFailureRecoveryActivity extends YouTubeBaseActivity
         if (requestCode == RECOVERY_DIALOG_REQUEST) {
             // Retry initialization if user performed a recovery action
             try {
-                getYouTubePlayerProvider().initialize(VideoService.DEVELOPER_KEY, this);
+                getYouTubePlayerProvider().initialize(YoutubeService.DEVELOPER_KEY, this);
             } catch (Throwable e) {
                 e.printStackTrace();
             }

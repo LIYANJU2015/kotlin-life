@@ -11,7 +11,7 @@ import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
 
 import org.cuieney.videolife.R;
-import org.cuieney.videolife.common.api.VideoService;
+import org.cuieney.videolife.common.api.YoutubeService;
 import org.cuieney.videolife.common.utils.LogUtil;
 import org.cuieney.videolife.entity.VideoListItemBean;
 import org.cuieney.videolife.ui.video.OnTransitionListener;
@@ -96,7 +96,7 @@ public class PlayActivity extends YouTubeFailureRecoveryActivity {
 
     private void initializeYoutubePlayer() {
         try {
-            videoPlayerView.initialize(VideoService.DEVELOPER_KEY, this);
+            videoPlayerView.initialize(YoutubeService.DEVELOPER_KEY, this);
         } catch (Throwable e) {
             e.printStackTrace();
         }

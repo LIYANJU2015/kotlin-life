@@ -14,8 +14,6 @@ import org.cuieney.videolife.common.base.BaseRecycerViewAdapter;
 import org.cuieney.videolife.common.image.ImageLoader;
 import org.cuieney.videolife.common.utils.DateUtil;
 import org.cuieney.videolife.entity.VideoListItemBean;
-import org.cuieney.videolife.entity.kaiyanBean.DataBean;
-import org.cuieney.videolife.entity.kaiyanBean.YoutubeItemListBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,7 +80,7 @@ public class VideoAdapter extends BaseRecycerViewAdapter<VideoListItemBean, Recy
                     .append(" ")
                     .append(" / ")
                     .append(" ")
-                    .append(DateUtil.convertDuration(itemListBean.getDuration()));
+                    .append(itemListBean.getDuration());
             myHolder.description.setText(stringBuilder.toString());
         }
     }

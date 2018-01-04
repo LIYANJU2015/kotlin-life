@@ -15,6 +15,8 @@ import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseMainFragment;
 import org.cuieney.videolife.common.base.SimpleActivity;
 import org.cuieney.videolife.common.component.EventUtil;
+import org.cuieney.videolife.common.utils.LogUtil;
+import org.cuieney.videolife.presenter.contract.VideoHomeContract;
 import org.cuieney.videolife.ui.fragment.essay.EssayFragment;
 import org.cuieney.videolife.ui.fragment.music.MusicFragment;
 import org.cuieney.videolife.ui.fragment.newstand.NewstandFragment;
@@ -49,21 +51,12 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
     }
 
     @Override
-    public void onBackPressedSupport() {
-        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            pop();
-        } else {
-            finish();
-        }
-    }
-
-    @Override
     protected void initEventAndData() {
         mFragments = new ArrayList<>();
-        mFragments.add(new VideoHomeFragment());
+        mFragments.add(VideoFragment.newInstance(VideoHomeContract.YOUTUBE_TYPE));
         mFragments.add(MusicFragment.newInstance());
-        mFragments.add(new EssayFragment());
-        mFragments.add(NewstandFragment.newInstance());
+        mFragments.add(VideoFragment.newInstance(VideoHomeContract.DAILYMOTION_TYPE));
+        mFragments.add(VideoFragment.newInstance(VideoHomeContract.VIMEN_TYPE));
         loadMultipleRootFragment(R.id.act_container, 0
                 , mFragments.get(0)
                 , mFragments.get(1)
@@ -144,6 +137,7 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
 
     @Subscribe
     public void hide(String isHide) {
+        LogUtil.d("hide isHide :" + isHide);
         if (isHide.equals("true")) {
             mSearchView.setVisibility(View.GONE);
         } else {

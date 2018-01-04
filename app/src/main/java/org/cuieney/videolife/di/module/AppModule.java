@@ -4,7 +4,9 @@ import android.content.Context;
 
 
 import org.cuieney.videolife.App;
-import org.cuieney.videolife.common.api.VideoService;
+import org.cuieney.videolife.common.api.DailymotionService;
+import org.cuieney.videolife.common.api.VimeoService;
+import org.cuieney.videolife.common.api.YoutubeService;
 import org.cuieney.videolife.common.api.OpApiService;
 import org.cuieney.videolife.common.api.SoundCloudApiService;
 import org.cuieney.videolife.di.RetrofitHelper;
@@ -33,7 +35,7 @@ public class AppModule {
 
 
     @Provides
-    VideoService proviesKyService(RetrofitHelper retrofitHelper){
+    YoutubeService proviesKyService(RetrofitHelper retrofitHelper){
         return retrofitHelper.getKyApiService();
     }
 
@@ -46,5 +48,15 @@ public class AppModule {
     @Provides
     OpApiService proviesOpService(RetrofitHelper retrofitHelper){
         return retrofitHelper.getOpApiService();
+    }
+
+    @Provides
+    DailymotionService proviesOpServiceDMService(RetrofitHelper retrofitHelper) {
+        return retrofitHelper.getDailymotionService();
+    }
+
+    @Provides
+    VimeoService proviesOpServiceVMService(RetrofitHelper retrofitHelper) {
+        return retrofitHelper.getVimeoService();
     }
 }

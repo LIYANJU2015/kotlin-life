@@ -7,8 +7,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
-import org.cuieney.videolife.entity.kaiyanBean.YoutubeItemListBean;
-
 import java.lang.reflect.Type;
 
 /**

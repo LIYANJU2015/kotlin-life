@@ -155,14 +155,13 @@ public class ImageLoader {
 //                iv.setImageBitmap(bitmap);
 //            }
 //        };
-        Glide.with(context).load(url).crossFade().skipMemoryCache(true)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
+        Glide.with(context).load(url).crossFade()
                 .into(iv);
     }
 
     public static void loadAll(Activity activity, String url, ImageView iv) {    //不缓存，全部从网络加载
         if (!activity.isDestroyed()) {
-            Glide.with(activity).load(url).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).into(iv);
+            Glide.with(activity).load(url).into(iv);
         }
     }
 

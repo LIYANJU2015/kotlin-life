@@ -2,6 +2,7 @@ package org.cuieney.videolife.common.base;
 
 
 import org.cuieney.videolife.common.component.RxBus;
+import org.cuieney.videolife.common.utils.LogUtil;
 
 import rx.Subscription;
 import rx.functions.Action1;
@@ -23,6 +24,7 @@ public class RxPresenter<T extends BaseView> implements BasePresenter<T> {
     }
 
     protected void addSubscrebe(Subscription subscription) {
+        LogUtil.d("addSubscrebe mCompositeSubscription " + mCompositeSubscription);
         if (mCompositeSubscription == null) {
             mCompositeSubscription = new CompositeSubscription();
         }

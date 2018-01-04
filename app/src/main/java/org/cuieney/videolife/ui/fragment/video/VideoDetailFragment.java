@@ -8,7 +8,6 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
-import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,12 +19,15 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.jaeger.library.StatusBarUtil;
 import com.konifar.fab_transformation.FabTransformation;
+import com.tubewebplayer.YouTubePlayerActivity;
 
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseBackFragment;
 import org.cuieney.videolife.common.image.ImageLoader;
 import org.cuieney.videolife.common.utils.LogUtil;
+import org.cuieney.videolife.entity.DMVideoItemListBean;
 import org.cuieney.videolife.entity.VideoListItemBean;
+import org.cuieney.videolife.entity.YoutubeItemListBean;
 import org.cuieney.videolife.ui.video.JumpUtils;
 
 
@@ -108,7 +110,14 @@ public class VideoDetailFragment extends BaseBackFragment {
 
                     @Override
                     public void onEndTransform() {
-                        JumpUtils.goToVideoPlayer(getActivity(), mImgDetail, dataBean);
+                        if (dataBean instanceof DMVideoItemListBean) {
+                            JumpUtils.goToDMPlayer(getActivity(), mImgDetail, dataBean);
+                        } else if (dataBean instanceof YoutubeItemListBean) {
+                            JumpUtils.goToYoutubePlayer(getActivity(), mImgDetail, dataBean);
+                        } else {
+                            YouTubePlayerActivity.launch(getActivity(), "https://vimeo.com/" + dataBean.getVideoId(),
+                                    dataBean.getTitle());
+                        }
                     }
                 }).transformTo(mImgDetail);
             }
@@ -132,9 +141,13 @@ public class VideoDetailFragment extends BaseBackFragment {
                     } catch (Exception e) {
                         LogUtil.d(e.getMessage());
                     }
-                    collToolBar.setContentScrimColor(color);
-                    StatusBarUtil.setColor(getActivity(), color);
-                    mFab.setBackgroundTintList(new ColorStateList(new int[][]{new int[0]}, new int[]{color}));
+                    try {
+                        collToolBar.setContentScrimColor(color);
+                        StatusBarUtil.setColor(getActivity(), color);
+                        mFab.setBackgroundTintList(new ColorStateList(new int[][]{new int[0]}, new int[]{color}));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 
                 });
 

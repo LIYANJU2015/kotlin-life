@@ -6,6 +6,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Formatter;
+import java.util.Locale;
 
 import static java.lang.System.currentTimeMillis;
 
@@ -14,6 +16,25 @@ import static java.lang.System.currentTimeMillis;
  */
 
 public class DateUtil {
+
+    public static String stringForTime(int timeMs) {
+        StringBuilder mFormatBuilder = new StringBuilder();
+        Formatter mFormatter = new Formatter(mFormatBuilder, Locale.getDefault());
+
+        int totalSeconds = timeMs / 1000;
+        int seconds = totalSeconds % 60;
+
+        int minutes = (totalSeconds / 60) % 60;
+
+        int hours = totalSeconds / 3600;
+
+        mFormatBuilder.setLength(0);
+        if (hours > 0) {
+            return mFormatter.format("%d:%02d:%02d", hours, minutes, seconds).toString();
+        } else {
+            return mFormatter.format("%02d:%02d", minutes, seconds).toString();
+        }
+    }
 
     public static String convertDuration(String duration) {
         duration = duration.substring(2);  // del. PT-symbols

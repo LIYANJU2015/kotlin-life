@@ -39,6 +39,9 @@ public class VideoListItemBean implements Parcelable{
     }
 
 
+    public VideoListItemBean() {
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -46,9 +49,6 @@ public class VideoListItemBean implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-    }
-
-    public VideoListItemBean() {
     }
 
     protected VideoListItemBean(Parcel in) {

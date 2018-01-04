@@ -16,8 +16,12 @@ public interface VideoHomeContract {
         void error(Throwable throwable);
     }
 
+    int YOUTUBE_TYPE = 1;
+    int DAILYMOTION_TYPE = 2;
+    int VIMEN_TYPE = 3;
+
     interface Presenter extends BasePresenter<View> {
-        void getVideoData(String date);
+        void getVideoData(Object nextPage, int requstType);
 
     }
 }

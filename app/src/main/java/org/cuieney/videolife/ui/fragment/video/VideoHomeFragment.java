@@ -9,6 +9,8 @@ import android.text.TextUtils;
 import android.transition.Fade;
 import android.transition.Slide;
 import android.util.Log;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -16,6 +18,7 @@ import android.widget.TextView;
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseFragment;
 import org.cuieney.videolife.common.component.EventUtil;
+import org.cuieney.videolife.common.utils.LogUtil;
 import org.cuieney.videolife.entity.VideoListBean;
 import org.cuieney.videolife.entity.VideoListItemBean;
 import org.cuieney.videolife.presenter.VideoHomePresenter;
@@ -25,6 +28,7 @@ import org.cuieney.videolife.common.base.DetailTransition;
 import org.cuieney.videolife.ui.widget.EndLessOnScrollListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import butterknife.BindView;
@@ -45,15 +49,30 @@ public class VideoHomeFragment extends BaseFragment<VideoHomePresenter> implemen
     TextView errorTv;
 
     private VideoAdapter adapter;
-    private static List<VideoListItemBean> sVideoListBean = new ArrayList<>();
+    private List<VideoListItemBean> sVideoListBean;
+    private static SparseArray<VideoHomeBean> sVideoMap = new SparseArray<>();
 
-    private static String sNextPageToken = "";
+    private Object sNextPageToken;
 
-    public static VideoHomeFragment newInstance() {
+    private int requestType = 0;
+
+    public static VideoHomeFragment newInstance(int requestType) {
         Bundle bundle = new Bundle();
         VideoHomeFragment videoFragment = new VideoHomeFragment();
+        bundle.putInt("request_type", requestType);
         videoFragment.setArguments(bundle);
         return videoFragment;
+    }
+
+    public class VideoHomeBean {
+        public VideoHomeBean(Object nextPageToken, List<VideoListItemBean> videoListItemBeans) {
+            this.nextPageToken = nextPageToken;
+            this.videoListBean = videoListItemBeans;
+        }
+
+        public Object nextPageToken;
+
+        private  List<VideoListItemBean> videoListBean;
     }
 
     @Override
@@ -68,10 +87,21 @@ public class VideoHomeFragment extends BaseFragment<VideoHomePresenter> implemen
 
     @Override
     protected void initEventAndData() {
+        requestType = getArguments().getInt("request_type", VideoHomeContract.YOUTUBE_TYPE);
+        if (sVideoMap.get(requestType) == null) {
+            sVideoListBean = new ArrayList<>();
+            VideoHomeBean videoHomeBean = new VideoHomeBean(sNextPageToken, sVideoListBean);
+            sVideoMap.put(requestType, videoHomeBean);
+        } else {
+            VideoHomeBean videoHomeBean = sVideoMap.get(requestType);
+            sVideoListBean = videoHomeBean.videoListBean;
+            sNextPageToken = videoHomeBean.nextPageToken;
+        }
+        LogUtil.d("initEventAndData requestType " + requestType);
 
         refresh.setProgressViewOffset(false, 100, 200);
         refresh.setOnRefreshListener(() -> {
-            mPresenter.getVideoData(sNextPageToken);
+            mPresenter.getVideoData(sNextPageToken, requestType);
         });
 
         LinearLayoutManager layout = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
@@ -83,15 +113,16 @@ public class VideoHomeFragment extends BaseFragment<VideoHomePresenter> implemen
         recycler.addOnScrollListener(new EndLessOnScrollListener(layout,0) {
             @Override
             public void onLoadMore() {
+                LogUtil.d("onLoadMore sNextPageToken " + sNextPageToken);
                 if (sNextPageToken == null) {
                     return;
                 }
-                mPresenter.getVideoData(sNextPageToken);
+                mPresenter.getVideoData(sNextPageToken, requestType);
             }
         });
 
         if (sVideoListBean.size() == 0) {
-            mPresenter.getVideoData(sNextPageToken);
+            mPresenter.getVideoData(sNextPageToken, requestType);
 
             loadingPB.setVisibility(View.VISIBLE);
             errorTv.setVisibility(View.GONE);
@@ -103,10 +134,10 @@ public class VideoHomeFragment extends BaseFragment<VideoHomePresenter> implemen
         loadingPB.setVisibility(View.GONE);
         errorTv.setVisibility(View.GONE);
 
-        if (TextUtils.isEmpty((String)videoListBean.getNextPage())) {
-            sNextPageToken = null;
+        if (videoListBean.hasMore()) {
+            sNextPageToken = videoListBean.getNextPage();
         } else {
-            sNextPageToken = (String)videoListBean.getNextPage();
+            sNextPageToken = null;
         }
 
         if (refresh.isRefreshing()) {
@@ -149,5 +180,9 @@ public class VideoHomeFragment extends BaseFragment<VideoHomePresenter> implemen
         Log.e("oye", "error: ", throwable);
         loadingPB.setVisibility(View.GONE);
         errorTv.setVisibility(View.VISIBLE);
+
+        if (refresh.isRefreshing()) {
+            refresh.setRefreshing(false);
+        }
     }
 }

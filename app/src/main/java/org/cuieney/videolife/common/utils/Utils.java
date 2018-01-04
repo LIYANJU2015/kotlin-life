@@ -17,14 +17,28 @@ import android.view.View;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import okio.ByteString;
 
 
 /**
  * Created by cuieney on 16/8/25.
  */
 public class Utils {
+
+    public static String basic(String userName, String password) {
+        try {
+            String usernameAndPassword = userName + ":" + password;
+            byte[] bytes = usernameAndPassword.getBytes("ISO-8859-1");
+            String encoded = ByteString.of(bytes).base64();
+            return "Basic " + encoded;
+        } catch (UnsupportedEncodingException e) {
+            throw new AssertionError();
+        }
+    }
 
     public static Bitmap fastBlur(Bitmap bkg, View view) {
         Log.v("xx", "fastBlur getMeasuredHeight " + view.getMeasuredHeight());

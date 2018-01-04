@@ -11,6 +11,10 @@ import java.util.List;
 
 public class VideoListBean implements Parcelable {
 
+    public boolean hasMore() {
+        return false;
+    }
+
     public Object getNextPage(){
         return null;
     }
@@ -36,4 +40,15 @@ public class VideoListBean implements Parcelable {
     protected VideoListBean(Parcel in) {
     }
 
+    public static final Creator<VideoListBean> CREATOR = new Creator<VideoListBean>() {
+        @Override
+        public VideoListBean createFromParcel(Parcel source) {
+            return new VideoListBean(source);
+        }
+
+        @Override
+        public VideoListBean[] newArray(int size) {
+            return new VideoListBean[size];
+        }
+    };
 }

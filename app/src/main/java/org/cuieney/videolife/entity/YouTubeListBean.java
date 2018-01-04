@@ -1,8 +1,7 @@
 package org.cuieney.videolife.entity;
 
 import android.os.Parcel;
-
-import org.cuieney.videolife.entity.kaiyanBean.YoutubeItemListBean;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +32,10 @@ public class YouTubeListBean extends VideoListBean {
     public YouTubeListBean() {
     }
 
+    @Override
+    public boolean hasMore() {
+        return !TextUtils.isEmpty(nextPageToken);
+    }
 
     @Override
     public int describeContents() {

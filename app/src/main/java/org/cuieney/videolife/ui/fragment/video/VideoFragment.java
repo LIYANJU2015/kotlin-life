@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseMainFragment;
+import org.cuieney.videolife.presenter.contract.VideoHomeContract;
 
 /**
  * Created by paohaile on 17/2/24.
@@ -15,9 +16,10 @@ import org.cuieney.videolife.common.base.BaseMainFragment;
 
 public class VideoFragment extends BaseMainFragment {
 
-    public static VideoFragment newInstance() {
+    public static VideoFragment newInstance(int type) {
 
         Bundle args = new Bundle();
+        args.putInt("type", type);
         VideoFragment fragment = new VideoFragment();
         fragment.setArguments(args);
         return fragment;
@@ -34,7 +36,7 @@ public class VideoFragment extends BaseMainFragment {
     public void onLazyInitView(@Nullable Bundle savedInstanceState) {
         super.onLazyInitView(savedInstanceState);
         if (savedInstanceState == null) {
-            loadRootFragment(R.id.fl_first_container, VideoHomeFragment.newInstance());
+            loadRootFragment(R.id.fl_first_container, VideoHomeFragment.newInstance(getArguments().getInt("type")));
         }
     }
 }

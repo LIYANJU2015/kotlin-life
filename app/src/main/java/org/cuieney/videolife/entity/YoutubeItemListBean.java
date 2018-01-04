@@ -1,4 +1,4 @@
-package org.cuieney.videolife.entity.kaiyanBean;
+package org.cuieney.videolife.entity;
 
 
 import android.os.Parcel;
@@ -7,7 +7,6 @@ import android.os.Parcelable;
 import com.google.gson.annotations.SerializedName;
 
 import org.cuieney.videolife.common.utils.DateUtil;
-import org.cuieney.videolife.entity.VideoListItemBean;
 
 /**
  * Created by cuieney on 17/2/26.
@@ -68,7 +67,7 @@ public class YoutubeItemListBean extends VideoListItemBean implements Parcelable
 
     public String getNormalThumbnailUrl() {
         if (thumbnails != null && thumbnails.getStandard() != null) {
-            return thumbnails.getMaxres().getUrl();
+            return thumbnails.getStandard().getUrl();
         } else if (thumbnails != null && thumbnails.getHigh() != null) {
             return thumbnails.getHigh().getUrl();
         } else if (thumbnails != null && thumbnails.getDefaultX() != null) {
