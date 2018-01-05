@@ -7,6 +7,8 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.admodule.AdModule;
+import com.admodule.adfb.IFacebookAd;
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
@@ -14,6 +16,8 @@ import com.ashokvarma.bottomnavigation.BottomNavigationItem;
 import com.jaeger.library.StatusBarUtil;
 import com.rating.RatingActivity;
 
+import org.cuieney.videolife.App;
+import org.cuieney.videolife.FacebookReportUtils;
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseMainFragment;
 import org.cuieney.videolife.common.base.SimpleActivity;
@@ -24,9 +28,7 @@ import org.cuieney.videolife.common.utils.Utils;
 import org.cuieney.videolife.presenter.contract.MusicHomeContract;
 import org.cuieney.videolife.presenter.contract.VideoHomeContract;
 import org.cuieney.videolife.ui.fragment.music.MusicFragment;
-import org.cuieney.videolife.ui.fragment.music.MusicHomeFragment;
 import org.cuieney.videolife.ui.fragment.video.VideoFragment;
-import org.cuieney.videolife.ui.fragment.video.VideoHomeFragment;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
@@ -129,6 +131,36 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
                 doSearch(currentQuery);
             }
         });
+
+        if (App.sIsCoolStart) {
+            App.sIsCoolStart = false;
+            AdModule.getInstance().getFacebookAd().setLoadListener(new IFacebookAd.FacebookAdListener() {
+                @Override
+                public void onLoadedAd(View view) {
+                    AdModule.getInstance().getFacebookAd().setLoadListener(null);
+                    AdModule.getInstance().createMaterialDialog().showAdDialog(MainActivity.this, view);
+                    AdModule.getInstance().getFacebookAd().loadAd(false, "146773445984805_146773949318088");
+
+                }
+
+                @Override
+                public void onStartLoadAd(View view) {
+                }
+
+                @Override
+                public void onLoadAdFailed(int i, String s) {
+                    AdModule.getInstance().getFacebookAd().setLoadListener(null);
+                    AdModule.getInstance().getAdMob().showInterstitialAd();
+                    AdModule.getInstance().getFacebookAd().loadAd(false, "146773445984805_146773949318088");
+                }
+            });
+            AdModule.getInstance().getFacebookAd().loadAd(false, "146773445984805_146773862651430");
+        } else {
+            AdModule.getInstance().getAdMob().requestNewInterstitial();
+            AdModule.getInstance().getFacebookAd().loadAd(false, "146773445984805_146773949318088");
+        }
+
+        FacebookReportUtils.logSentPageShow("youtube");
     }
 
     private void doSearch(String query) {
@@ -138,10 +170,18 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
             if (supportFragment instanceof MusicFragment) {
                 ((MusicFragment)supportFragment).addSearchFragment(currentType, query);
             }
+            FacebookReportUtils.logSentPageShow("search soundcloud query " + query);
         } else {
             SupportFragment supportFragment = mFragments.get(currentPostion);
             if (supportFragment instanceof VideoFragment) {
                 ((VideoFragment)supportFragment).addSearchFragment(currentType, query);
+            }
+            if (currentType == VideoHomeContract.SEARCH_VIMEN_TYPE) {
+                FacebookReportUtils.logSentPageShow("search vimen query " + query);
+            } else if (currentType == VideoHomeContract.SEARCH_DAILYMOTION_TYPE) {
+                FacebookReportUtils.logSentPageShow("search dm query " + query);
+            } else {
+                FacebookReportUtils.logSentPageShow("search youtube query " + query);
             }
         }
     }
@@ -168,22 +208,29 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
             public void onTabSelected(int position) {
                 showHideFragment(mFragments.get(position));
                 currentPostion = position;
+
+                AdModule.getInstance().getFacebookAd().loadAd(false, "146773445984805_146773949318088");
+
                 switch (position) {
                     case 0:
                         currentType = VideoHomeContract.SEARCH_YOUTUBE_TYPE;
                         sCurrentStatusColor = Color.parseColor("#E64A19");
+                        FacebookReportUtils.logSentPageShow("youtube");
                         break;
                     case 1:
                         currentType = MusicHomeContract.SEARCH_SOUDN_CLOUD_TYPE;
                         sCurrentStatusColor = Color.parseColor("#f8600f");
+                        FacebookReportUtils.logSentPageShow("soundcoud");
                         break;
                     case 2:
                         currentType = VideoHomeContract.SEARCH_DAILYMOTION_TYPE;
                         sCurrentStatusColor = Color.parseColor("#1166dc");
+                        FacebookReportUtils.logSentPageShow("dailymotion");
                         break;
                     case 3:
                         currentType = VideoHomeContract.SEARCH_VIMEN_TYPE;
                         sCurrentStatusColor = Color.parseColor("#01adef");
+                        FacebookReportUtils.logSentPageShow("vimen");
                         break;
                 }
 

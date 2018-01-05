@@ -32,6 +32,12 @@ public abstract class BaseRecycerViewAdapter<T,V extends RecyclerView.ViewHolder
         this.mClickListener = itemClickListener;
     }
 
+    private RecyclerView.Adapter mParentAdapter;
+
+    public void setParnetAdapter(RecyclerView.Adapter adapter) {
+        mParentAdapter = adapter;
+    }
+
 
     public BaseRecycerViewAdapter(Context context) {
         this(context,null);
@@ -56,13 +62,23 @@ public abstract class BaseRecycerViewAdapter<T,V extends RecyclerView.ViewHolder
     }
 
     public void addAll(int position, Collection<? extends T> collection) {
-        list.addAll(position, collection);
-        notifyItemRangeInserted(position, collection.size());
+        if (mParentAdapter != null) {
+            int postionStart = mParentAdapter.getItemCount();
+            list.addAll(position, collection);
+            notifyItemRangeInserted(postionStart, collection.size());
+        } else {
+            list.addAll(position, collection);
+            notifyItemRangeInserted(position, collection.size());
+        }
     }
 
     public void clear() {
         list.clear();
-        notifyDataSetChanged();
+        if (mParentAdapter != null) {
+            mParentAdapter.notifyDataSetChanged();
+        } else {
+            notifyDataSetChanged();
+        }
     }
 
     @Override

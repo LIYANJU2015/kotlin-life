@@ -95,8 +95,15 @@ public class PlayMusciActivity extends SimpleActivity {
         player = new MediaPlayer();
         player.reset();
         player.setOnPreparedListener(MediaPlayer -> {
+
+            if (isFinishing()) {
+                return;
+            }
+
             player.start();
-            mStart.setText("00:00");
+            if (mStart != null) {
+                mStart.setText("00:00");
+            }
             mEnd.setText(DateUtils.formatElapsedTime(player.getDuration() / 1000));
         });
         player.setOnErrorListener((MediaPlayer, i, i1) -> {

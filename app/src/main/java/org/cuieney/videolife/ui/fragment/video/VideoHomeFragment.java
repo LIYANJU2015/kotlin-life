@@ -2,6 +2,7 @@ package org.cuieney.videolife.ui.fragment.video;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,13 +12,26 @@ import android.transition.Slide;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.admodule.AdModule;
+import com.admodule.admob.AdMobBanner;
+import com.facebook.ads.AdChoicesView;
+import com.facebook.ads.MediaView;
+import com.facebook.ads.NativeAd;
+import com.google.android.gms.ads.AdListener;
+
+import org.cuieney.videolife.App;
+import org.cuieney.videolife.FacebookReportUtils;
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseFragment;
 import org.cuieney.videolife.common.component.EventUtil;
+import org.cuieney.videolife.common.utils.AdViewWrapperAdapter;
 import org.cuieney.videolife.common.utils.LogUtil;
 import org.cuieney.videolife.entity.VideoListBean;
 import org.cuieney.videolife.entity.VideoListItemBean;
@@ -95,10 +109,14 @@ public class VideoHomeFragment extends BaseFragment<VideoHomePresenter> implemen
         return R.layout.video_home_fragment;
     }
 
+    private AdViewWrapperAdapter adViewWrapperAdapter;
+
     @Override
     protected void initEventAndData() {
         requestType = getArguments().getInt("request_type", VideoHomeContract.YOUTUBE_TYPE);
         queryContent = getArguments().getString("query", "");
+
+        initBannerView();
 
         if (requestType > VideoHomeContract.VIMEN_TYPE) {
             sVideoListBean = new ArrayList<>();
@@ -128,7 +146,9 @@ public class VideoHomeFragment extends BaseFragment<VideoHomePresenter> implemen
 
         adapter = new VideoAdapter(getActivity(), sVideoListBean);
         adapter.setOnItemClickListener((position, view, vh) -> startChildFragment(sVideoListBean.get(position), (VideoAdapter.MyHolder) vh));
-        recycler.setAdapter(adapter);
+        adViewWrapperAdapter = new AdViewWrapperAdapter(adapter);
+        adapter.setParnetAdapter(adViewWrapperAdapter);
+        recycler.setAdapter(adViewWrapperAdapter);
         recycler.addOnScrollListener(new EndLessOnScrollListener(layout,0) {
             @Override
             public void onLoadMore() {
@@ -153,7 +173,100 @@ public class VideoHomeFragment extends BaseFragment<VideoHomePresenter> implemen
 
             loadingPB.setVisibility(View.VISIBLE);
             errorTv.setVisibility(View.GONE);
+        } else if (sVideoListBean.size() > 3) {
+            NativeAd nativeAd = AdModule.getInstance().getFacebookAd().getNativeAd();
+            if (nativeAd!= null && nativeAd.isAdLoaded()) {
+                adViewWrapperAdapter.addAdView(22, new AdViewWrapperAdapter.
+                        AdViewItem(setUpNativeAdView(nativeAd), 2));
+            }
         }
+    }
+
+    private AdMobBanner adMobBanner;
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (adMobBanner != null) {
+            adMobBanner.pause();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (adMobBanner != null) {
+            adMobBanner.resume();
+        }
+    }
+
+    private void initBannerView() {
+        adMobBanner = AdModule.getInstance().getAdMob().createBannerAdView();
+        adMobBanner.setAdRequest(AdModule.getInstance().getAdMob().createAdRequest());
+        adMobBanner.setAdListener(new AdListener(){
+            @Override
+            public void onAdLoaded() {
+                super.onAdLoaded();
+                if (getActivity() != null && getActivity().isFinishing()) {
+                    return;
+                }
+
+                if (adViewWrapperAdapter == null || adViewWrapperAdapter.isAddAdView()) {
+                    return;
+                }
+
+                if (adViewWrapperAdapter.getItemCount() > 4 && adMobBanner != null) {
+                    adMobBanner.getAdView().setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT,
+                            RecyclerView.LayoutParams.WRAP_CONTENT));
+                    adViewWrapperAdapter.addAdView(22, new AdViewWrapperAdapter.
+                            AdViewItem(adMobBanner.getAdView(), 2));
+                    adViewWrapperAdapter.notifyItemInserted(2);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (adMobBanner != null) {
+            adMobBanner.destroy();
+            adMobBanner = null;
+        }
+    }
+
+    private View setUpNativeAdView(NativeAd nativeAd) {
+        nativeAd.unregisterView();
+
+        View adView = LayoutInflater.from(getActivity()).inflate(R.layout.home_video_ad_item, null);
+
+        FrameLayout adChoicesFrame = (FrameLayout) adView.findViewById(R.id.fb_adChoices);
+        ImageView nativeAdIcon = (ImageView) adView.findViewById(R.id.fb_half_icon);
+        TextView nativeAdTitle = (TextView) adView.findViewById(R.id.fb_banner_title);
+        TextView nativeAdBody = (TextView) adView.findViewById(R.id.fb_banner_desc);
+        TextView nativeAdCallToAction = (TextView) adView.findViewById(R.id.fb_half_download);
+        MediaView nativeAdMedia = (MediaView) adView.findViewById(com.admodule.R.id.fb_half_mv);
+
+        nativeAdCallToAction.setText(nativeAd.getAdCallToAction());
+        nativeAdTitle.setText(nativeAd.getAdTitle());
+        nativeAdBody.setText(nativeAd.getAdBody());
+
+        // Downloading and setting the ad icon.
+        NativeAd.Image adIcon = nativeAd.getAdIcon();
+        NativeAd.downloadAndDisplayImage(adIcon, nativeAdIcon);
+
+        // Download and setting the cover image.
+        NativeAd.Image adCoverImage = nativeAd.getAdCoverImage();
+        nativeAdMedia.setNativeAd(nativeAd);
+
+        // Add adChoices icon
+        AdChoicesView adChoicesView = new AdChoicesView(getActivity(), nativeAd, true);
+        adChoicesFrame.addView(adChoicesView, 0);
+        adChoicesFrame.setVisibility(View.VISIBLE);
+
+        nativeAd.registerViewForInteraction(adView);
+
+        return adView;
     }
 
     @Override
@@ -172,9 +285,28 @@ public class VideoHomeFragment extends BaseFragment<VideoHomePresenter> implemen
             sVideoListBean.clear();
             adapter.clear();
             adapter.addAll(videoListBean.getItemList());
-            recycler.setAdapter(adapter);
+            adViewWrapperAdapter.clearAdView();
+
+            NativeAd nativeAd = AdModule.getInstance().getFacebookAd().getNativeAd();
+            if (nativeAd!= null && nativeAd.isAdLoaded() && videoListBean.getItemList().size() > 3) {
+                adViewWrapperAdapter.addAdView(22, new AdViewWrapperAdapter.
+                        AdViewItem(setUpNativeAdView(nativeAd), 2));
+                if (requestType == VideoHomeContract.DAILYMOTION_TYPE) {
+                    FacebookReportUtils.logSentFBAdShow("DMPage");
+                } else if (requestType == VideoHomeContract.YOUTUBE_TYPE) {
+                    FacebookReportUtils.logSentFBAdShow("YoutubePage");
+                } else {
+                    FacebookReportUtils.logSentFBAdShow("VimeoPage");
+                }
+            }
+
+            recycler.setAdapter(adViewWrapperAdapter);
         }else{
-            adapter.addAll(videoListBean.getItemList());
+            NativeAd nativeAd = AdModule.getInstance().getFacebookAd().getNativeAd();
+            if (nativeAd!= null && nativeAd.isAdLoaded() && videoListBean.getItemList().size() > 3) {
+                adViewWrapperAdapter.addAdView(22, new AdViewWrapperAdapter.
+                        AdViewItem(setUpNativeAdView(nativeAd), 2));
+            }            adapter.addAll(videoListBean.getItemList());
         }
         sVideoListBean.addAll(videoListBean.getItemList());
     }

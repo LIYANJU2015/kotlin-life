@@ -3,6 +3,7 @@ package org.cuieney.videolife.ui.fragment.video;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -14,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.admodule.AdModule;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -21,12 +23,14 @@ import com.jaeger.library.StatusBarUtil;
 import com.konifar.fab_transformation.FabTransformation;
 import com.tubewebplayer.WebViewPlayerActivity;
 
+import org.cuieney.videolife.FacebookReportUtils;
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseBackFragment;
 import org.cuieney.videolife.common.image.ImageLoader;
 import org.cuieney.videolife.common.utils.LogUtil;
 import org.cuieney.videolife.entity.DMVideoItemListBean;
 import org.cuieney.videolife.entity.VideoListItemBean;
+import org.cuieney.videolife.entity.VimeoItemListBean;
 import org.cuieney.videolife.entity.YoutubeItemListBean;
 import org.cuieney.videolife.ui.video.JumpUtils;
 
@@ -126,6 +130,25 @@ public class VideoDetailFragment extends BaseBackFragment {
 
         initColor();
 
+        if (dataBean instanceof YoutubeItemListBean) {
+            FacebookReportUtils.logSentPageShow("youtube_detail");
+        } else if (dataBean instanceof DMVideoItemListBean) {
+            FacebookReportUtils.logSentPageShow("dm_video_detail");
+        } else if (dataBean instanceof VimeoItemListBean) {
+            FacebookReportUtils.logSentPageShow("vimeo_video_detail");
+        }
+
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                AdModule.getInstance().getAdMob().showInterstitialAd();
+            }
+        }, 600);
     }
 
     int color = 0xffffcc00;

@@ -8,11 +8,11 @@ android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
-        applicationId "org.cuieney.videolife"
+        applicationId "com.gotubemaster.playtube"
         minSdkVersion 19
         targetSdkVersion 22
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
@@ -24,10 +24,20 @@ android {
         exclude 'META-INF/services/javax.annotation.processing.Processor'
     }
 
+    signingConfigs {
+        release {
+            storeFile file("keystore")
+            storePassword "123456"
+            keyAlias "qwer"
+            keyPassword "123456"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     compileOptions {
@@ -63,8 +73,15 @@ dependencies {
     })
     compile(name: 'tubewebplayer-release2', ext: 'aar')
     compile(name: 'rating-release', ext: 'aar')
+    compile(name: 'admodule-release2', ext: 'aar')
     testCompile 'junit:junit:4.12'
     compile 'ren.yale.android:cachewebviewlib:1.3.0'
+    compile 'com.facebook.android:facebook-android-sdk:4.11.0'
+    compile 'com.facebook.android:audience-network-sdk:4.27.0'
+    compile 'com.tencent.bugly:crashreport:latest.release'
+    compile 'com.google.android.gms:play-services-ads:11.6.2'
+    compile 'com.zhy:base-rvadapter:3.0.3'
+
     //    compile "com.android.support:appcompat-v7:$supportLib"
     compile "com.android.support:cardview-v7:$supportLib"
     compile "com.android.support:recyclerview-v7:$supportLib"
@@ -115,13 +132,4 @@ dependencies {
     compile 'com.android.support:multidex:1.0.1'
     //fragment manager
     compile 'me.yokeyword:fragmentation:0.10.1'
-    //canary
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
-    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
-
-    //blockcanary
-    compile 'com.github.markzhai:blockcanary-android:1.5.0'
-    debugCompile 'com.github.markzhai:blockcanary-android:1.5.0'
-    releaseCompile 'com.github.markzhai:blockcanary-no-op:1.5.0'
 }

@@ -3,15 +3,25 @@ package org.cuieney.videolife;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.multidex.MultiDex;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
 
+import com.admodule.AdModule;
+import com.admodule.admob.AdMobBanner;
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
+import com.tencent.bugly.crashreport.CrashReport;
+
 import org.cuieney.videolife.di.component.AppComponent;
 import org.cuieney.videolife.di.component.DaggerAppComponent;
 import org.cuieney.videolife.di.module.AppModule;
 import org.cuieney.videolife.di.module.RetrofitModule;
+import org.cuieney.videolife.ui.act.MainActivity;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -84,6 +94,28 @@ public class App extends Application {
         }
     }
 
+    public static void addShortcut(Context context, Class clazz, String appName, int ic_launcher) {
+        // 安装的Intent
+        Intent shortcut = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
+
+        Intent shortcutIntent = new Intent(Intent.ACTION_MAIN);
+        shortcutIntent.putExtra("tName", appName);
+        shortcutIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, appName);
+        shortcutIntent.setClassName(context, clazz.getName());
+        //        shortcutIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        // 快捷名称
+        shortcut.putExtra(Intent.EXTRA_SHORTCUT_NAME, context.getResources().getString(R.string.app_name));
+        // 快捷图标是否允许重复
+        shortcut.putExtra("duplicate", false);
+        shortcut.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
+        // 快捷图标
+        Intent.ShortcutIconResource iconRes = Intent.ShortcutIconResource.fromContext(context, ic_launcher);
+        shortcut.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, iconRes);
+        // 发送广播
+        context.sendBroadcast(shortcut);
+    }
 
 
     @Override
@@ -91,6 +123,14 @@ public class App extends Application {
         super.onCreate();
         app = this;
         initAppComponent();
+
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        AppEventsLogger.activateApp(this);
+
+        if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("addShortcut", false)) {
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("addShortcut", true).apply();
+            addShortcut(app, MainActivity.class, getString(R.string.app_name), R.mipmap.ic_launcher);
+        }
 //        AutoLayoutConifg.getInstance().useDeviceSize();
 //        getScreenSize();
 
@@ -102,7 +142,69 @@ public class App extends Application {
 //        BlockCanary.install(this, new AppBlockCanaryContext()).start();
 
 //        CrashHandler.getInstance().initCrashHandler(this);
+
+
+        AdModule.init(new AdModule.AdCallBack() {
+            @Override
+            public Application getApplication() {
+                return App.app;
+            }
+
+            @Override
+            public String getAppId() {
+                return "ca-app-pub-9880857526519562~2748080363";
+            }
+
+            @Override
+            public boolean isAdDebug() {
+                return false;
+            }
+
+            @Override
+            public boolean isLogDebug() {
+                return false;
+            }
+
+            @Override
+            public String getAdMobNativeAdId() {
+                return null;
+            }
+
+            @Override
+            public String getBannerAdId() {
+                return "ca-app-pub-9880857526519562/3592180757";
+            }
+
+            @Override
+            public String getInterstitialAdId() {
+                return "ca-app-pub-9880857526519562/7423614552";
+            }
+
+            @Override
+            public String getTestDevice() {
+                return null;
+            }
+
+            @Override
+            public String getRewardedVideoAdId() {
+                return null;
+            }
+
+            @Override
+            public String getFBNativeAdId() {
+                return "146773445984805_146773862651430";
+            }
+        });
+
+        AdModule.getInstance().getAdMob().initInterstitialAd();
+        AdModule.getInstance().getAdMob().requestNewInterstitial();
+
+        sIsCoolStart = true;
+
+        CrashReport.initCrashReport(getApplicationContext(), "c55a94a9a6", false);
     }
+
+    public static boolean sIsCoolStart;
 
     public AppComponent getAppComponent() {
         return appComponent;

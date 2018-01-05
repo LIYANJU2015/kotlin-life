@@ -68,7 +68,7 @@ public class VideoAdapter extends BaseRecycerViewAdapter<VideoListItemBean, Recy
             }
 
             myHolder.itemView.setOnClickListener(v -> {
-                if (mClickListener != null) {
+                if (mClickListener != null && list.size() > position) {
                     mClickListener.onItemClick(position, v, myHolder);
                 }
             });

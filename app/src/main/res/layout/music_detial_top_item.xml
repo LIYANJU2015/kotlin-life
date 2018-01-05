@@ -20,9 +20,15 @@
         android:textColor="@android:color/black"
         android:textSize="16sp" />
 
+    <FrameLayout
+        android:layout_below="@id/title"
+        android:id="@+id/ad_view_frame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
     <com.ms.square.android.expandabletextview.ExpandableTextView
         android:id="@+id/expand_text_view"
-        android:layout_below="@id/title"
+        android:layout_below="@id/ad_view_frame"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="10dp"
         android:layout_marginTop="10dp"
