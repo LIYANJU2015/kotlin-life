@@ -16,7 +16,6 @@ import org.cuieney.videolife.di.component.DaggerFragmentComponent;
 import org.cuieney.videolife.di.component.FragmentComponent;
 import org.cuieney.videolife.di.module.FragmentModule;
 import org.cuieney.videolife.ui.act.MainActivity;
-import org.cuieney.videolife.ui.fragment.video.VideoFragment;
 
 import javax.inject.Inject;
 
@@ -67,7 +66,9 @@ import me.yokeyword.fragmentation.SupportFragment;
      @Override
      public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
          super.onViewCreated(view, savedInstanceState);
-         mPresenter.attachView(this);
+         if (mPresenter != null) {
+             mPresenter.attachView(this);
+         }
          mUnBinder = ButterKnife.bind(this, view);
          if (savedInstanceState == null) {
              if (!isHidden()) {

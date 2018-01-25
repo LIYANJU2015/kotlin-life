@@ -33,34 +33,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".ui.act.PlayActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Translucent" />
-
-        <activity android:name=".ui.act.DailymotionPlayerActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="portrait"
-            android:launchMode="singleTask"
-            android:hardwareAccelerated="true"
-            android:theme="@style/Theme.AppCompat.Translucent"
-            />
-
-        <activity android:name="ui.act.VimeoPlayerActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="portrait"
-            android:launchMode="singleTask"
-            android:hardwareAccelerated="true"
-            android:theme="@style/Theme.AppCompat.Translucent"
-            />
-
-        <activity android:name="com.tubewebplayer.WebViewPlayerActivity"
-            android:hardwareAccelerated="true"
-            android:configChanges="orientation|screenSize"
-            android:launchMode="singleTop"
-            android:theme="@style/Theme.AppCompat.Translucent2"
-            android:screenOrientation="portrait" />
 
         <activity
             android:name=".ui.act.PlayMusciActivity"

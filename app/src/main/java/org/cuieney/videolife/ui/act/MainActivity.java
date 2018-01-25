@@ -26,9 +26,8 @@ import org.cuieney.videolife.common.utils.LogUtil;
 import org.cuieney.videolife.common.utils.PreferenceUtil;
 import org.cuieney.videolife.common.utils.Utils;
 import org.cuieney.videolife.presenter.contract.MusicHomeContract;
-import org.cuieney.videolife.presenter.contract.VideoHomeContract;
+import org.cuieney.videolife.ui.fragment.music.DownloadFragment;
 import org.cuieney.videolife.ui.fragment.music.MusicFragment;
-import org.cuieney.videolife.ui.fragment.video.VideoFragment;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
@@ -38,8 +37,6 @@ import java.util.Locale;
 import butterknife.BindView;
 import me.yokeyword.fragmentation.SupportFragment;
 import me.yokeyword.fragmentation.helper.FragmentLifecycleCallbacks;
-
-import static com.ashokvarma.bottomnavigation.BottomNavigationBar.BACKGROUND_STYLE_RIPPLE;
 import static com.ashokvarma.bottomnavigation.BottomNavigationBar.MODE_FIXED;
 
 public class MainActivity extends SimpleActivity implements BaseMainFragment.OnBackToFirstListener {
@@ -92,15 +89,11 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
     @Override
     protected void initEventAndData() {
         mFragments = new ArrayList<>();
-        mFragments.add(VideoFragment.newInstance(VideoHomeContract.YOUTUBE_TYPE));
         mFragments.add(MusicFragment.newInstance());
-        mFragments.add(VideoFragment.newInstance(VideoHomeContract.DAILYMOTION_TYPE));
-        mFragments.add(VideoFragment.newInstance(VideoHomeContract.VIMEN_TYPE));
+        mFragments.add(DownloadFragment.newInstance());
         loadMultipleRootFragment(R.id.act_container, 0
                 , mFragments.get(0)
                 , mFragments.get(1)
-                , mFragments.get(2)
-                , mFragments.get(3)
 
         );
 
@@ -159,8 +152,6 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
             AdModule.getInstance().getAdMob().requestNewInterstitial();
             AdModule.getInstance().getFacebookAd().loadAd(false, "146773445984805_146773949318088");
         }
-
-        FacebookReportUtils.logSentPageShow("youtube");
     }
 
     private void doSearch(String query) {
@@ -173,33 +164,21 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
             FacebookReportUtils.logSentPageShow("search soundcloud query " + query);
         } else {
             SupportFragment supportFragment = mFragments.get(currentPostion);
-            if (supportFragment instanceof VideoFragment) {
-                ((VideoFragment)supportFragment).addSearchFragment(currentType, query);
-            }
-            if (currentType == VideoHomeContract.SEARCH_VIMEN_TYPE) {
-                FacebookReportUtils.logSentPageShow("search vimen query " + query);
-            } else if (currentType == VideoHomeContract.SEARCH_DAILYMOTION_TYPE) {
-                FacebookReportUtils.logSentPageShow("search dm query " + query);
-            } else {
-                FacebookReportUtils.logSentPageShow("search youtube query " + query);
-            }
         }
     }
 
     public static int sCurrentStatusColor = Color.parseColor("#E64A19");
 
-    private int currentType = VideoHomeContract.SEARCH_YOUTUBE_TYPE;
+    private int currentType;
     private int currentPostion;
 
     private void initView() {
         mNavigationView
-                .addItem(new BottomNavigationItem(R.drawable.youtube_icon, "YouTube").setActiveColor("#E64A19")
-                        .setInActiveColor("#CCCCCC"))
-                .addItem(new BottomNavigationItem(R.drawable.soundcloud_icon, "SoundCloud").setActiveColor("#f8600f"))
-                .addItem(new BottomNavigationItem(R.drawable.dailymotion_icon, "Dailymotion").setActiveColor("#1166dc"))
-                .addItem(new BottomNavigationItem(R.drawable.vimeo_icon, "Vimeo").setActiveColor("#01adef"))
+                .addItem(new BottomNavigationItem(R.drawable.ic_main_bt_album, "Album")
+                        .setActiveColorResource(R.color.black))
+                .addItem(new BottomNavigationItem(R.drawable.ic_main_bt_download, "Downloads")
+                        .setActiveColorResource(R.color.black))
                 .initialise();
-        mNavigationView.setBackgroundStyle(BACKGROUND_STYLE_RIPPLE);
         mNavigationView.setMode(MODE_FIXED);
         mNavigationView.setAutoHideEnabled(true);
 
@@ -211,30 +190,13 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
 
                 AdModule.getInstance().getFacebookAd().loadAd(false, "146773445984805_146773949318088");
 
-                switch (position) {
-                    case 0:
-                        currentType = VideoHomeContract.SEARCH_YOUTUBE_TYPE;
-                        sCurrentStatusColor = Color.parseColor("#E64A19");
-                        FacebookReportUtils.logSentPageShow("youtube");
-                        break;
-                    case 1:
-                        currentType = MusicHomeContract.SEARCH_SOUDN_CLOUD_TYPE;
-                        sCurrentStatusColor = Color.parseColor("#f8600f");
-                        FacebookReportUtils.logSentPageShow("soundcoud");
-                        break;
-                    case 2:
-                        currentType = VideoHomeContract.SEARCH_DAILYMOTION_TYPE;
-                        sCurrentStatusColor = Color.parseColor("#1166dc");
-                        FacebookReportUtils.logSentPageShow("dailymotion");
-                        break;
-                    case 3:
-                        currentType = VideoHomeContract.SEARCH_VIMEN_TYPE;
-                        sCurrentStatusColor = Color.parseColor("#01adef");
-                        FacebookReportUtils.logSentPageShow("vimen");
-                        break;
-                }
-
                 StatusBarUtil.setColor(MainActivity.this, sCurrentStatusColor);
+
+                if (position == 0) {
+                    mSearchView.setVisibility(View.VISIBLE);
+                } else {
+                    mSearchView.setVisibility(View.INVISIBLE);
+                }
             }
 
             @Override

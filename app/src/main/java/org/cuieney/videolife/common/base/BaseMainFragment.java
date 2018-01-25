@@ -2,7 +2,9 @@ package org.cuieney.videolife.common.base;
 
 import android.content.Context;
 
-import org.cuieney.videolife.ui.fragment.video.VideoFragment;
+
+import org.cuieney.videolife.ui.fragment.music.MusicFragment;
+import org.cuieney.videolife.ui.fragment.music.MusicHomeFragment;
 
 import me.yokeyword.fragmentation.SupportFragment;
 
@@ -40,7 +42,7 @@ public abstract class BaseMainFragment extends SupportFragment {
         if (getChildFragmentManager().getBackStackEntryCount() > 1) {
             popChild();
         } else {
-            if (this instanceof VideoFragment) {   // 如果是 第一个Fragment 则退出app
+            if (this instanceof MusicFragment) {   // 如果是 第一个Fragment 则退出app
                 _mActivity.finish();
             } else {                                    // 如果不是,则回到第一个Fragment
                 _mBackToFirstListener.onBackToFirstFragment();

@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseMainFragment;
-import org.cuieney.videolife.ui.fragment.video.VideoHomeFragment;
 
 /**
  * Created by paohaile on 17/2/24.
@@ -39,8 +38,7 @@ public class MusicFragment extends BaseMainFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.music_fragment, container, false);
-        return view;
+        return inflater.inflate(R.layout.music_fragment, container, false);
     }
 
     @Override
