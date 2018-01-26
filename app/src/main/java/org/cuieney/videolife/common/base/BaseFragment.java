@@ -91,7 +91,7 @@ import me.yokeyword.fragmentation.SupportFragment;
              isInited = true;
              initEventAndData();
          } else {
-             StatusBarUtil.setColor(getActivity(), MainActivity.sCurrentStatusColor);
+             StatusBarUtil.setColor(getActivity(), MainActivity.sCurrentStatusColor, 255);
          }
      }
 

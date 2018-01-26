@@ -1,8 +1,12 @@
 package org.cuieney.videolife.common.utils;
 
 import android.content.Context;
+import android.os.Handler;
 import android.view.Gravity;
 import android.widget.Toast;
+
+import org.cuieney.videolife.App;
+
 
 /**
  * Created by cuieney on 16/11/30.
@@ -10,12 +14,23 @@ import android.widget.Toast;
 public class ToastUtil {
     private static Toast sToastInstance;
 
+    private static Handler mainHandler = new Handler();
+
     private static Toast createToast(final Context context, String text, int duration) {
         if (null == sToastInstance) {
             sToastInstance = Toast.makeText(context, text, duration);
         }
 
         return sToastInstance;
+    }
+
+    public static void showLongToastSafe(String text){
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                showToast(App.getInstance(), text ,Toast.LENGTH_LONG);
+            }
+        });
     }
 
     public static void showToast(final Context context, String text, int duration) {

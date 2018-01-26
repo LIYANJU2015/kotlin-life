@@ -3,11 +3,14 @@ package org.cuieney.videolife.data;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Base64;
 
 import org.cuieney.videolife.common.utils.Utils;
 import org.cuieney.videolife.entity.MusicListBean;
 import org.cuieney.videolife.entity.wyBean.TracksBean;
 
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,10 +54,8 @@ public class MangoDataHandler {
     public static ArrayList<MusicListBean> searchData(ArrayList<MusicListBean> searchList,
                                                       String query) {
         ArrayList<MusicListBean> searchedList = new ArrayList<>();
-        Pattern pattern = Pattern.compile(query, Pattern.CASE_INSENSITIVE);
         for (MusicListBean musicListBean : searchList) {
-            Matcher matcher = pattern.matcher(musicListBean.getMname());
-            if (matcher.find()){
+            if (musicListBean.getMname().toLowerCase().contains(query.toLowerCase())){
                 searchedList.add(musicListBean);
             }
         }
@@ -98,7 +99,7 @@ public class MangoDataHandler {
             }
 
             TracksBean tracksBean = new TracksBean();
-            tracksBean.setFilename(DOWNLOAD_MP3_URL + mp3);
+            tracksBean.setFilename(DOWNLOAD_MP3_URL + encode(mp3));
             tracksBean.setSongname(songName);
             tracksBean.singer = artistName;
             tracksBean.setSongphoto(HOST_URL + aritistPhonto);
@@ -146,7 +147,7 @@ public class MangoDataHandler {
             }
 
             TracksBean tracksBean = new TracksBean();
-            tracksBean.setFilename(DOWNLOAD_MP3_URL + mp3);
+            tracksBean.setFilename(DOWNLOAD_MP3_URL + encode(mp3));
             tracksBean.setSongname(songName);
             tracksBean.singer = artistName;
             tracksBean.setSongphoto(ALBUM_IMAGE_URL + artistName + "/"
@@ -157,6 +158,10 @@ public class MangoDataHandler {
         if (sArtistsCallBack != null) {
             sArtistsCallBack.onCallBack(sArtistList);
         }
+    }
+
+    private static String encode(String str) {
+        return str.replace(" ", "%20");
     }
 
     private static void handleSongFromCursor(Cursor cursor) {
@@ -180,7 +185,7 @@ public class MangoDataHandler {
             musicListBean.setTitle(songName);
 
             TracksBean tracksBean = new TracksBean();
-            tracksBean.setFilename(DOWNLOAD_MP3_URL + mp3);
+            tracksBean.setFilename(DOWNLOAD_MP3_URL + encode(mp3));
             tracksBean.singer = artistName;
             tracksBean.setSongname(songName);
             tracksBean.setSongphoto(HOST_URL + aritistPhonto);

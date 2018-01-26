@@ -18,9 +18,13 @@ import com.admodule.Utils;
 import com.admodule.admob.AdMobBanner;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
+import com.liulishuo.filedownloader.FileDownloader;
+import com.liulishuo.filedownloader.util.FileDownloadHelper;
 import com.tencent.bugly.crashreport.CrashReport;
 import com.zhy.autolayout.config.AutoLayoutConifg;
 
+import org.cuieney.videolife.common.utils.Constants;
+import org.cuieney.videolife.common.utils.LogUtil;
 import org.cuieney.videolife.data.MangoDataHandler;
 import org.cuieney.videolife.di.component.AppComponent;
 import org.cuieney.videolife.di.component.DaggerAppComponent;
@@ -139,11 +143,14 @@ public class App extends Application {
         return "";
     }
 
+    private long startTime;
 
     @Override
     public void onCreate() {
         super.onCreate();
         app = this;
+        startTime = System.currentTimeMillis();
+        FileDownloader.setup(app);
 
         final String packageName = getPackageName();
         if (!TextUtils.isEmpty(packageName) && !packageName.equals(getCurrentProcessName())) {
@@ -219,7 +226,7 @@ public class App extends Application {
 
             @Override
             public String getFBNativeAdId() {
-                return "146773445984805_146773862651430";
+                return Constants.NATIVE_HOME_ADID;
             }
         });
 
@@ -229,6 +236,9 @@ public class App extends Application {
         sIsCoolStart = true;
 
         CrashReport.initCrashReport(getApplicationContext());
+        LogUtil.d(" result time:::" + (System.currentTimeMillis() - startTime));
+
+        AdModule.getInstance().getFacebookAd().loadAds(Constants.NATIVE_LIST_ITEM_ADID);
     }
 
     public static boolean sIsCoolStart;

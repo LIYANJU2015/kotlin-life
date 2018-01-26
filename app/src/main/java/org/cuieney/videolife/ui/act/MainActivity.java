@@ -3,6 +3,7 @@ package org.cuieney.videolife.ui.act;
 import android.content.Intent;
 import android.graphics.Color;
 import android.speech.RecognizerIntent;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,6 +14,7 @@ import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
+import com.facebook.ads.NativeAd;
 import com.jaeger.library.StatusBarUtil;
 import com.rating.RatingActivity;
 
@@ -22,6 +24,7 @@ import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseMainFragment;
 import org.cuieney.videolife.common.base.SimpleActivity;
 import org.cuieney.videolife.common.component.EventUtil;
+import org.cuieney.videolife.common.utils.Constants;
 import org.cuieney.videolife.common.utils.LogUtil;
 import org.cuieney.videolife.common.utils.PreferenceUtil;
 import org.cuieney.videolife.common.utils.Utils;
@@ -39,8 +42,11 @@ import me.yokeyword.fragmentation.SupportFragment;
 import me.yokeyword.fragmentation.helper.FragmentLifecycleCallbacks;
 
 import static com.ashokvarma.bottomnavigation.BottomNavigationBar.BACKGROUND_STYLE_DEFAULT;
+import static com.ashokvarma.bottomnavigation.BottomNavigationBar.BACKGROUND_STYLE_RIPPLE;
 import static com.ashokvarma.bottomnavigation.BottomNavigationBar.BACKGROUND_STYLE_STATIC;
+import static com.ashokvarma.bottomnavigation.BottomNavigationBar.MODE_DEFAULT;
 import static com.ashokvarma.bottomnavigation.BottomNavigationBar.MODE_FIXED;
+import static com.ashokvarma.bottomnavigation.BottomNavigationBar.MODE_SHIFTING;
 
 public class MainActivity extends SimpleActivity implements BaseMainFragment.OnBackToFirstListener {
 
@@ -112,6 +118,8 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
             }
         });
 
+
+        mSearchView.setShowSearchKey(true);
         mSearchView.setOnMenuItemClickListener(new FloatingSearchView.OnMenuItemClickListener() {
             @Override
             public void onActionMenuItemSelected(MenuItem item) {
@@ -139,7 +147,12 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
                 public void onLoadedAd(View view) {
                     AdModule.getInstance().getFacebookAd().setLoadListener(null);
                     AdModule.getInstance().createMaterialDialog().showAdDialog(MainActivity.this, view);
-                    AdModule.getInstance().getFacebookAd().loadAd(false, "146773445984805_146773949318088");
+                    AdModule.getInstance().getFacebookAd().loadAd(false, Constants.NATIVE_LIST_ITEM_ADID);
+                }
+
+                @Override
+                public void onLoadedAd(NativeAd nativeAd) {
+
                 }
 
                 @Override
@@ -150,17 +163,18 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
                 public void onLoadAdFailed(int i, String s) {
                     AdModule.getInstance().getFacebookAd().setLoadListener(null);
                     AdModule.getInstance().getAdMob().showInterstitialAd();
-                    AdModule.getInstance().getFacebookAd().loadAd(false, "146773445984805_146773949318088");
+                    AdModule.getInstance().getFacebookAd().loadAd(false, Constants.NATIVE_LIST_ITEM_ADID);
                 }
             });
-            AdModule.getInstance().getFacebookAd().loadAd(false, "146773445984805_146773862651430");
+            AdModule.getInstance().getFacebookAd().loadAd(false, Constants.NATIVE_HOME_ADID);
         } else {
             AdModule.getInstance().getAdMob().requestNewInterstitial();
-            AdModule.getInstance().getFacebookAd().loadAd(false, "146773445984805_146773949318088");
+            AdModule.getInstance().getFacebookAd().loadAd(false, Constants.NATIVE_LIST_ITEM_ADID);
         }
     }
 
     private void doSearch(String query) {
+        mSearchView.clearQuery();
         LogUtil.d("onSearchAction currentType " + currentType);
         SupportFragment supportFragment = mFragments.get(currentPostion);
         if (supportFragment instanceof MusicFragment) {
@@ -170,27 +184,24 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
 
     }
 
-    public static int sCurrentStatusColor = Color.parseColor("#E64A19");
+    public static int sCurrentStatusColor = ContextCompat.getColor(App.getInstance(), R.color.colorPrimary);
 
     private int currentType = MusicFragment.ALBUM_SEARCH_TYPE;
     private int currentPostion;
 
     private void initView() {
         mNavigationView
-                .addItem(new BottomNavigationItem(R.drawable.ic_main_bt_album, R.string.main_album_text)
-                        .setActiveColorResource(R.color.colorPrimaryDark))
-                .setBarBackgroundColor(R.color.material_white)
-                .addItem(new BottomNavigationItem(R.drawable.ic_main_bt_album, R.string.main_artists_text)
-                        .setActiveColorResource(R.color.colorPrimaryDark))
-                .setBarBackgroundColor(R.color.material_white)
-                .addItem(new BottomNavigationItem(R.drawable.ic_main_bt_album, R.string.main_song_text)
-                        .setActiveColorResource(R.color.material_white))
-                .setBarBackgroundColor(R.color.colorPrimary)
+                .addItem(new BottomNavigationItem(R.drawable.ic_album_black, R.string.main_album_text)
+                        .setActiveColorResource(R.color.colorPrimary))
+                .addItem(new BottomNavigationItem(R.drawable.ic_artist_black, R.string.main_artists_text)
+                        .setActiveColorResource(R.color.colorPrimary))
+                .addItem(new BottomNavigationItem(R.drawable.ic_song_black, R.string.main_song_text)
+                        .setActiveColorResource(R.color.colorPrimary))
                 .addItem(new BottomNavigationItem(R.drawable.ic_main_bt_download, R.string.main_download_text)
-                        .setActiveColorResource(R.color.material_white))
-                .setBarBackgroundColor(R.color.colorPrimary)
+                        .setActiveColorResource(R.color.colorPrimary))
                 .initialise();
         mNavigationView.setMode(MODE_FIXED);
+        mNavigationView.setBackgroundStyle(BACKGROUND_STYLE_RIPPLE);
         mNavigationView.setAutoHideEnabled(true);
         mNavigationView.setTabSelectedListener(new BottomNavigationBar.OnTabSelectedListener() {
             @Override
@@ -198,9 +209,7 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
                 showHideFragment(mFragments.get(position));
                 currentPostion = position;
 
-                AdModule.getInstance().getFacebookAd().loadAd(false, "146773445984805_146773949318088");
-
-                StatusBarUtil.setColor(MainActivity.this, sCurrentStatusColor);
+                StatusBarUtil.setColor(MainActivity.this, sCurrentStatusColor, 255);
 
                 if (position == 3) {
                     mSearchView.setVisibility(View.INVISIBLE);

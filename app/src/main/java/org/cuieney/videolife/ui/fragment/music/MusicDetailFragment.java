@@ -37,6 +37,7 @@ import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseBackFragment;
 import org.cuieney.videolife.common.image.ImageLoader;
 import org.cuieney.videolife.common.utils.AdViewWrapperAdapter;
+import org.cuieney.videolife.common.utils.Constants;
 import org.cuieney.videolife.common.utils.LogUtil;
 import org.cuieney.videolife.common.utils.PreferenceUtil;
 import org.cuieney.videolife.entity.MusicListBean;
@@ -83,7 +84,7 @@ public class MusicDetailFragment extends BaseBackFragment {
         mToolbar = ((Toolbar) view.findViewById(R.id.toolbar));
         collToolBar = ((CollapsingToolbarLayout) view.findViewById(R.id.toolbar_layout));
         mImgDetail = (ImageView) view.findViewById(R.id.img_detail);
-        mFab = (FloatingActionButton) view.findViewById(R.id.fab);
+//        mFab = (FloatingActionButton) view.findViewById(R.id.fab);
         recycler = ((XRecyclerView) view.findViewById(R.id.recycler));
 
         recycler.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
@@ -93,23 +94,24 @@ public class MusicDetailFragment extends BaseBackFragment {
         ImageLoader.loadAll(getActivity(), dataBean.getOphoto(), mImgDetail);
         recycler.setLoadingMoreEnabled(false);
         recycler.setPullRefreshEnabled(false);
-        recycler.setAdapter(new MusicItemAdapter(getActivity(), dataBean.getTracks()));
+        recycler.setAdapter(new MusicItemAdapter(getActivity(), dataBean.getTracks(),
+                getChildFragmentManager()));
         initHeadView();
 
-        mFab.setOnClickListener(v -> {
-            if (mFab.getVisibility() == View.VISIBLE) {
-                FabTransformation.with(mFab).setListener(new FabTransformation.OnTransformListener() {
-                    @Override
-                    public void onStartTransform() {
-                    }
-
-                    @Override
-                    public void onEndTransform() {
-                        JumpUtils.goToMusicPlayer(getActivity(), mImgDetail, dataBean);
-                    }
-                }).transformTo(mImgDetail);
-            }
-        });
+//        mFab.setOnClickListener(v -> {
+//            if (mFab.getVisibility() == View.VISIBLE) {
+//                FabTransformation.with(mFab).setListener(new FabTransformation.OnTransformListener() {
+//                    @Override
+//                    public void onStartTransform() {
+//                    }
+//
+//                    @Override
+//                    public void onEndTransform() {
+//                        JumpUtils.goToMusicPlayer(getActivity(), mImgDetail, dataBean);
+//                    }
+//                }).transformTo(mImgDetail);
+//            }
+//        });
 
         initBannerView();
 
@@ -148,7 +150,7 @@ public class MusicDetailFragment extends BaseBackFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        AdModule.getInstance().getFacebookAd().loadAd(false, "146773445984805_146773949318088");
+        AdModule.getInstance().getFacebookAd().loadAd(false, Constants.NATIVE_LIST_ITEM_ADID);
         if (adMobBanner != null) {
             adMobBanner.destroy();
             adMobBanner = null;
@@ -169,6 +171,9 @@ public class MusicDetailFragment extends BaseBackFragment {
         adFrame = (FrameLayout) headerView.findViewById(R.id.ad_view_frame);
         adFrame.removeAllViews();
         NativeAd nativeAd = AdModule.getInstance().getFacebookAd().getNativeAd();
+        if (nativeAd == null || !nativeAd.isAdLoaded()) {
+            nativeAd = AdModule.getInstance().getFacebookAd().nextNativieAd();
+        }
         if (nativeAd != null && nativeAd.isAdLoaded()) {
             FacebookReportUtils.logSentFBAdShow("musicDetail");
             adFrame.addView(setUpNativeAdView(nativeAd));
@@ -230,7 +235,7 @@ public class MusicDetailFragment extends BaseBackFragment {
                     }
                     collToolBar.setContentScrimColor(color);
                     StatusBarUtil.setColor(getActivity(), color);
-                    mFab.setBackgroundTintList(new ColorStateList(new int[][]{new int[0]}, new int[]{color}));
+//                    mFab.setBackgroundTintList(new ColorStateList(new int[][]{new int[0]}, new int[]{color}));
 
                 });
 
@@ -245,19 +250,19 @@ public class MusicDetailFragment extends BaseBackFragment {
             adMobBanner.resume();
         }
 
-        FabTransformation.with(mFab).setListener(new FabTransformation.OnTransformListener() {
-            @Override
-            public void onStartTransform() {
-
-            }
-
-            @Override
-            public void onEndTransform() {
-                if (mImgDetail.getVisibility() == View.INVISIBLE) {
-                    mImgDetail.setVisibility(View.VISIBLE);
-                }
-            }
-        }).transformFrom(mImgDetail);
+//        FabTransformation.with(mFab).setListener(new FabTransformation.OnTransformListener() {
+//            @Override
+//            public void onStartTransform() {
+//
+//            }
+//
+//            @Override
+//            public void onEndTransform() {
+//                if (mImgDetail.getVisibility() == View.INVISIBLE) {
+//                    mImgDetail.setVisibility(View.VISIBLE);
+//                }
+//            }
+//        }).transformFrom(mImgDetail);
     }
 
 }

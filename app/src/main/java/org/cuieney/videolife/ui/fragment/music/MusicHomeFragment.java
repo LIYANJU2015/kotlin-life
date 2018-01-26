@@ -11,7 +11,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.transition.Fade;
 import android.transition.Slide;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -19,6 +21,7 @@ import android.widget.TextView;
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseFragment;
 import org.cuieney.videolife.common.component.EventUtil;
+import org.cuieney.videolife.common.utils.LogUtil;
 import org.cuieney.videolife.common.utils.Utils;
 import org.cuieney.videolife.data.MangoDataHandler;
 import org.cuieney.videolife.entity.MusicListBean;
@@ -26,6 +29,7 @@ import org.cuieney.videolife.presenter.MusicHomePresenter;
 import org.cuieney.videolife.presenter.contract.MusicHomeContract;
 import org.cuieney.videolife.ui.adapter.MusicAdapter;
 import org.cuieney.videolife.common.base.DetailTransition;
+import org.cuieney.videolife.ui.widget.DownloadBottomSheetDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,13 +70,6 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
         initEventAndData();
     }
 
-    public static MusicHomeFragment newInstance() {
-        Bundle bundle = new Bundle();
-        MusicHomeFragment musicHomeFragment = new MusicHomeFragment();
-        musicHomeFragment.setArguments(bundle);
-        return musicHomeFragment;
-    }
-
     @Override
     protected void initInject() {
         getFragmentComponent().inject(this);
@@ -93,16 +90,17 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
         outState.putString("query", query);
     }
 
+    @Nullable
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         type = getArguments().getInt("type");
         query = getArguments().getString("query");
+        return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     @Override
     protected void initEventAndData() {
-
+        LogUtil.d("initEventAndData type: " + type);
         RecyclerView.LayoutManager layout;
         if (type == MusicFragment.SONGS_TYPE || type == MusicFragment.SONGS_SEARCH_TYPE) {
             layout = new LinearLayoutManager(getActivity());
@@ -114,7 +112,12 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
         adapter = new MusicAdapter(getActivity(),null, layout instanceof GridLayoutManager);
         recycler.setAdapter(adapter);
         adapter.setOnItemClickListener((position, view, vh) -> {
-            startChildFragment(mMusicList.get(position), vh);
+            if (type == MusicFragment.SONGS_TYPE || type == MusicFragment.SONGS_SEARCH_TYPE) {
+                DownloadBottomSheetDialog.newInstance(mMusicList.get(position).getTracks().get(0))
+                        .showBottomSheetFragment(getChildFragmentManager());
+            } else {
+                startChildFragment(mMusicList.get(position), vh);
+            }
         });
 
         loadingPB.setVisibility(View.VISIBLE);
@@ -165,8 +168,13 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
 
     @Override
     public void showContent(List<MusicListBean> musicListBean) {
-        loadingPB.setVisibility(View.GONE);
-        errorTv.setVisibility(View.GONE);
+        if (musicListBean.size() == 0) {
+            errorTv.setVisibility(View.VISIBLE);
+            loadingPB.setVisibility(View.GONE);
+        } else {
+            loadingPB.setVisibility(View.GONE);
+            errorTv.setVisibility(View.GONE);
+        }
 
         adapter.addAll(musicListBean);
     }

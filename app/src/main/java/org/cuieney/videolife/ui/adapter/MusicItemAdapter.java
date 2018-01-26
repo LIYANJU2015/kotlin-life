@@ -1,6 +1,7 @@
 package org.cuieney.videolife.ui.adapter;
 
 import android.content.Context;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseRecycerViewAdapter;
 import org.cuieney.videolife.entity.wyBean.TracksBean;
+import org.cuieney.videolife.ui.widget.DownloadBottomSheetDialog;
 
 import java.util.List;
 
@@ -19,8 +21,11 @@ import java.util.List;
 
 public class MusicItemAdapter extends BaseRecycerViewAdapter<TracksBean,RecyclerView.ViewHolder> {
 
-    public MusicItemAdapter(Context context, List<TracksBean> list) {
+    private FragmentManager manager;
+
+    public MusicItemAdapter(Context context, List<TracksBean> list, FragmentManager manager) {
         super(context, list);
+        this.manager = manager;
     }
 
     @Override
@@ -31,10 +36,19 @@ public class MusicItemAdapter extends BaseRecycerViewAdapter<TracksBean,Recycler
     @Override
     public void getBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         MyViewHolder viewHolder = (MyViewHolder) holder;
-        TracksBean tracksBean = list.get(position);
+        final TracksBean tracksBean = list.get(position);
         viewHolder.num.setText((position+1)+"");
         viewHolder.title.setText(tracksBean.getSongname());
         viewHolder.dis.setText(tracksBean.getSonger());
+
+        viewHolder.itemView.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                DownloadBottomSheetDialog
+                        .newInstance(tracksBean)
+                        .showBottomSheetFragment(manager);
+            }
+        });
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder{

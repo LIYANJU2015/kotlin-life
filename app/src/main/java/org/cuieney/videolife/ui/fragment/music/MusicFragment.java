@@ -42,7 +42,6 @@ public class MusicFragment extends BaseMainFragment {
 
     public void addSearchFragment(int type, String query) {
         MusicHomeFragment musicFragment = (MusicHomeFragment) getChildFragmentManager().findFragmentById(R.id.search_container);
-        LogUtil.d("addSearchFragment musicFragment " + musicFragment);
         if (musicFragment == null || musicFragment.type != type) {
             replaceLoadRootFragment(R.id.search_container, MusicHomeFragment.newInstance(type, query), true);
         } else {

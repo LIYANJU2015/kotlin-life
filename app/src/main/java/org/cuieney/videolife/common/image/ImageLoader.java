@@ -162,7 +162,7 @@ public class ImageLoader {
 
     public static void loadAll(Activity activity, String url, ImageView iv) {    //不缓存，全部从网络加载
         if (!activity.isDestroyed()) {
-            Glide.with(activity).load(url).into(iv);
+            Glide.with(activity).load(url).placeholder(R.drawable.default_album_art).into(iv);
         }
     }
 
