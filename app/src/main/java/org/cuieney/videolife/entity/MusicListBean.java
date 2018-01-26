@@ -43,17 +43,7 @@ public class MusicListBean implements Parcelable {
     }
 
     public String getOphoto() {
-        if (TextUtils.isEmpty(artwork_url) & tracks != null) {
-            for (TracksBean tracksBean : tracks) {
-                if (!TextUtils.isEmpty(tracksBean.getSongphoto())) {
-                    return tracksBean.getSongphoto();
-                }
-            }
-        } else {
-            return artwork_url;
-        }
-
-        return "";
+        return artwork_url;
     }
 
     public List<TracksBean> getTracks() {

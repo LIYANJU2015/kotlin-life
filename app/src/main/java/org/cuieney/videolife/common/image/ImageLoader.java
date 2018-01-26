@@ -156,6 +156,7 @@ public class ImageLoader {
 //            }
 //        };
         Glide.with(context).load(url).crossFade()
+                .placeholder(R.drawable.default_album_art)
                 .into(iv);
     }
 

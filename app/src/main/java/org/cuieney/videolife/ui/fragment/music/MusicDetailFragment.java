@@ -220,6 +220,9 @@ public class MusicDetailFragment extends BaseBackFragment {
             public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
 
                 Palette.from(resource).generate(palette -> {
+                    if (!isAdded() || getActivity() == null) {
+                        return;
+                    }
                     try {
                         color = palette.getLightMutedSwatch().getRgb();
                     } catch (Exception e) {

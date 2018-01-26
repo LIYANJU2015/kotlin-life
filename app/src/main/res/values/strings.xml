@@ -69,4 +69,9 @@
 
     <string name="facebook_app_id">146773445984805</string>
     <string name="fb_login_protocol_scheme">fb146773445984805</string>
+
+    <string name="main_album_text">Albums</string>
+    <string name="main_artists_text">Artists</string>
+    <string name="main_song_text">Songs</string>
+    <string name="main_download_text">Downloads</string>
 </resources>

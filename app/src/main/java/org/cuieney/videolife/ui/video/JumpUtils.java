@@ -24,7 +24,7 @@ public class JumpUtils {
         Bundle bundle = new Bundle();
         bundle.putParcelable(PlayMusciActivity.DATA,dataBean);
         intent.putExtras(bundle);
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP && view != null) {
             Pair pair = new Pair<>(view, "IMG_TRANSITION");
             ActivityOptionsCompat activityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(
                     activity, pair);

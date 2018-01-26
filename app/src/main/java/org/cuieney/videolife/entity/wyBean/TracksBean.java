@@ -15,7 +15,7 @@ public class TracksBean implements Parcelable {
     public String stream_url;
     public String artwork_url;
     public long duration;
-    public User user;
+    public String singer;
     public String description;
 
     public int getId() {
@@ -27,7 +27,7 @@ public class TracksBean implements Parcelable {
     }
 
     public String getSonger() {
-        return user != null ? user.username : "";
+        return singer;
     }
 
     public String getSongname() {
@@ -71,7 +71,7 @@ public class TracksBean implements Parcelable {
         dest.writeString(this.stream_url);
         dest.writeString(this.artwork_url);
         dest.writeLong(this.duration);
-        dest.writeParcelable(this.user, flags);
+        dest.writeString(this.singer);
     }
 
     public TracksBean() {
@@ -83,7 +83,7 @@ public class TracksBean implements Parcelable {
         this.stream_url = in.readString();
         this.artwork_url = in.readString();
         this.duration = in.readLong();
-        this.user = in.readParcelable(User.class.getClassLoader());
+        this.singer = in.readString();
     }
 
     public static final Creator<TracksBean> CREATOR = new Creator<TracksBean>() {
@@ -97,39 +97,4 @@ public class TracksBean implements Parcelable {
             return new TracksBean[size];
         }
     };
-
-    public static class User implements Parcelable{
-
-        public String username;
-
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(this.username);
-        }
-
-        public User() {
-        }
-
-        protected User(Parcel in) {
-            this.username = in.readString();
-        }
-
-        public static final Creator<User> CREATOR = new Creator<User>() {
-            @Override
-            public User createFromParcel(Parcel source) {
-                return new User(source);
-            }
-
-            @Override
-            public User[] newArray(int size) {
-                return new User[size];
-            }
-        };
-    }
 }

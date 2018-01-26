@@ -22,16 +22,19 @@ import java.util.List;
  */
 
 public class MusicAdapter extends BaseRecycerViewAdapter<MusicListBean, RecyclerView.ViewHolder> {
-    public MusicAdapter(Context context, List<MusicListBean> list) {
+
+    private boolean isGrid;
+
+    public MusicAdapter(Context context, List<MusicListBean> list, boolean isGrid) {
         super(context, list);
+        this.isGrid = isGrid;
     }
 
     @Override
     public RecyclerView.ViewHolder getCreateViewHolder(ViewGroup parent, int viewType) {
-        if (viewType == R.layout.music_item) {
+        if (viewType == R.layout.music_item || viewType == R.layout.music_grid_item) {
             return new MusicAdapter.MyViewHoler(inflater.inflate(viewType, parent, false));
         } else {
-
             return new MusicAdapter.TopHolder(inflater.inflate(viewType, parent, false));
         }
     }
@@ -58,9 +61,18 @@ public class MusicAdapter extends BaseRecycerViewAdapter<MusicListBean, Recycler
     public int getItemViewType(int position) {
 
         if (position == 0 || position == 1) {
-            return R.layout.top_item;
+            if (isGrid) {
+                return R.layout.top_item2;
+            } else {
+                return R.layout.top_item;
+            }
         }
-        return R.layout.music_item;
+
+        if (isGrid) {
+            return R.layout.music_grid_item;
+        } else {
+            return R.layout.music_item;
+        }
 
     }
 

@@ -37,6 +37,9 @@ import java.util.Locale;
 import butterknife.BindView;
 import me.yokeyword.fragmentation.SupportFragment;
 import me.yokeyword.fragmentation.helper.FragmentLifecycleCallbacks;
+
+import static com.ashokvarma.bottomnavigation.BottomNavigationBar.BACKGROUND_STYLE_DEFAULT;
+import static com.ashokvarma.bottomnavigation.BottomNavigationBar.BACKGROUND_STYLE_STATIC;
 import static com.ashokvarma.bottomnavigation.BottomNavigationBar.MODE_FIXED;
 
 public class MainActivity extends SimpleActivity implements BaseMainFragment.OnBackToFirstListener {
@@ -89,11 +92,15 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
     @Override
     protected void initEventAndData() {
         mFragments = new ArrayList<>();
-        mFragments.add(MusicFragment.newInstance());
+        mFragments.add(MusicFragment.newInstance(MusicFragment.ALBUM_TYPE));
+        mFragments.add(MusicFragment.newInstance(MusicFragment.ARTISTS_TYPE));
+        mFragments.add(MusicFragment.newInstance(MusicFragment.SONGS_TYPE));
         mFragments.add(DownloadFragment.newInstance());
         loadMultipleRootFragment(R.id.act_container, 0
                 , mFragments.get(0)
                 , mFragments.get(1)
+                , mFragments.get(2)
+                , mFragments.get(3)
 
         );
 
@@ -133,7 +140,6 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
                     AdModule.getInstance().getFacebookAd().setLoadListener(null);
                     AdModule.getInstance().createMaterialDialog().showAdDialog(MainActivity.this, view);
                     AdModule.getInstance().getFacebookAd().loadAd(false, "146773445984805_146773949318088");
-
                 }
 
                 @Override
@@ -156,32 +162,36 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
 
     private void doSearch(String query) {
         LogUtil.d("onSearchAction currentType " + currentType);
-        if (currentType == MusicHomeContract.SEARCH_SOUDN_CLOUD_TYPE) {
-            SupportFragment supportFragment = mFragments.get(currentPostion);
-            if (supportFragment instanceof MusicFragment) {
-                ((MusicFragment)supportFragment).addSearchFragment(currentType, query);
-            }
-            FacebookReportUtils.logSentPageShow("search soundcloud query " + query);
-        } else {
-            SupportFragment supportFragment = mFragments.get(currentPostion);
+        SupportFragment supportFragment = mFragments.get(currentPostion);
+        if (supportFragment instanceof MusicFragment) {
+            ((MusicFragment) supportFragment).addSearchFragment(currentType, query);
         }
+        FacebookReportUtils.logSentPageShow("search soundcloud query " + query);
+
     }
 
     public static int sCurrentStatusColor = Color.parseColor("#E64A19");
 
-    private int currentType;
+    private int currentType = MusicFragment.ALBUM_SEARCH_TYPE;
     private int currentPostion;
 
     private void initView() {
         mNavigationView
-                .addItem(new BottomNavigationItem(R.drawable.ic_main_bt_album, "Album")
-                        .setActiveColorResource(R.color.black))
-                .addItem(new BottomNavigationItem(R.drawable.ic_main_bt_download, "Downloads")
-                        .setActiveColorResource(R.color.black))
+                .addItem(new BottomNavigationItem(R.drawable.ic_main_bt_album, R.string.main_album_text)
+                        .setActiveColorResource(R.color.colorPrimaryDark))
+                .setBarBackgroundColor(R.color.material_white)
+                .addItem(new BottomNavigationItem(R.drawable.ic_main_bt_album, R.string.main_artists_text)
+                        .setActiveColorResource(R.color.colorPrimaryDark))
+                .setBarBackgroundColor(R.color.material_white)
+                .addItem(new BottomNavigationItem(R.drawable.ic_main_bt_album, R.string.main_song_text)
+                        .setActiveColorResource(R.color.material_white))
+                .setBarBackgroundColor(R.color.colorPrimary)
+                .addItem(new BottomNavigationItem(R.drawable.ic_main_bt_download, R.string.main_download_text)
+                        .setActiveColorResource(R.color.material_white))
+                .setBarBackgroundColor(R.color.colorPrimary)
                 .initialise();
         mNavigationView.setMode(MODE_FIXED);
         mNavigationView.setAutoHideEnabled(true);
-
         mNavigationView.setTabSelectedListener(new BottomNavigationBar.OnTabSelectedListener() {
             @Override
             public void onTabSelected(int position) {
@@ -192,10 +202,22 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
 
                 StatusBarUtil.setColor(MainActivity.this, sCurrentStatusColor);
 
-                if (position == 0) {
-                    mSearchView.setVisibility(View.VISIBLE);
-                } else {
+                if (position == 3) {
                     mSearchView.setVisibility(View.INVISIBLE);
+                } else {
+                    mSearchView.setVisibility(View.VISIBLE);
+                }
+
+                switch (position) {
+                    case 0:
+                        currentType = MusicFragment.ALBUM_SEARCH_TYPE;
+                        break;
+                    case 1:
+                        currentType = MusicFragment.ARTISTS_SEARCH_TYPE;
+                        break;
+                    case 2:
+                        currentType = MusicFragment.SONGS_SEARCH_TYPE;
+                        break;
                 }
             }
 

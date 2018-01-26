@@ -24,7 +24,9 @@ public abstract class BaseRecycerViewAdapter<T,V extends RecyclerView.ViewHolder
     public BaseRecycerViewAdapter(Context context, List<T> list) {
         this.context = context;
         this.list = new ArrayList<>();
-        this.addAll(list);
+        if (list != null) {
+            this.addAll(list);
+        }
         inflater = LayoutInflater.from(context);
     }
 

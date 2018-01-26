@@ -6,9 +6,7 @@ import com.google.gson.GsonBuilder;
 import org.cuieney.videolife.common.api.UrlManager;
 import org.cuieney.videolife.common.api.SoundCloudApiService;
 import org.cuieney.videolife.entity.MusicListBean;
-import org.cuieney.videolife.entity.SoundCloudDeserializer;
 
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -41,7 +39,6 @@ public class RetrofitHelper {
         GsonConverterFactory gsonConverterFactory;
         if (UrlManager.SOUNDCLOUD_HOST.equals(baseUrl)) {
             GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(MusicListBean.class, new SoundCloudDeserializer());
             Gson gson = gsonBuilder.create();
             gsonConverterFactory = GsonConverterFactory.create(gson);
         }else {

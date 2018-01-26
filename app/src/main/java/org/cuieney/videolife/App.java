@@ -1,22 +1,27 @@
 package org.cuieney.videolife;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.multidex.MultiDex;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
 
 import com.admodule.AdModule;
+import com.admodule.Utils;
 import com.admodule.admob.AdMobBanner;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 import com.tencent.bugly.crashreport.CrashReport;
+import com.zhy.autolayout.config.AutoLayoutConifg;
 
+import org.cuieney.videolife.data.MangoDataHandler;
 import org.cuieney.videolife.di.component.AppComponent;
 import org.cuieney.videolife.di.component.DaggerAppComponent;
 import org.cuieney.videolife.di.module.AppModule;
@@ -24,6 +29,7 @@ import org.cuieney.videolife.di.module.RetrofitModule;
 import org.cuieney.videolife.ui.act.MainActivity;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -117,11 +123,33 @@ public class App extends Application {
         context.sendBroadcast(shortcut);
     }
 
+    private String getCurrentProcessName() {
+        int pid = android.os.Process.myPid();
+        ActivityManager am = (ActivityManager)
+                getSystemService(Context.ACTIVITY_SERVICE);
+        final List<ActivityManager.RunningAppProcessInfo> appProcessInfos = am.getRunningAppProcesses();
+
+        if (appProcessInfos != null) {
+            for (ActivityManager.RunningAppProcessInfo appProcess : appProcessInfos) {
+                if (appProcess.pid == pid) {
+                    return appProcess.processName;
+                }
+            }
+        }
+        return "";
+    }
+
 
     @Override
     public void onCreate() {
         super.onCreate();
         app = this;
+
+        final String packageName = getPackageName();
+        if (!TextUtils.isEmpty(packageName) && !packageName.equals(getCurrentProcessName())) {
+            return;
+        }
+
         initAppComponent();
 
         FacebookSdk.sdkInitialize(getApplicationContext());
@@ -131,18 +159,17 @@ public class App extends Application {
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("addShortcut", true).apply();
             addShortcut(app, MainActivity.class, getString(R.string.app_name), R.mipmap.ic_launcher);
         }
-//        AutoLayoutConifg.getInstance().useDeviceSize();
-//        getScreenSize();
 
-//        //内存泄漏检测
-//        if (LeakCanary.isInAnalyzerProcess(this)) {
-//            return;
-//        }
-//        LeakCanary.install(this);
-//        BlockCanary.install(this, new AppBlockCanaryContext()).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                MangoDataHandler.init(app);
+                MangoDataHandler.initMangoData();
+            }
+        }).start();
 
-//        CrashHandler.getInstance().initCrashHandler(this);
-
+        AutoLayoutConifg.getInstance().useDeviceSize();
+        getScreenSize();
 
         AdModule.init(new AdModule.AdCallBack() {
             @Override
@@ -201,7 +228,7 @@ public class App extends Application {
 
         sIsCoolStart = true;
 
-        CrashReport.initCrashReport(getApplicationContext(), "c55a94a9a6", false);
+        CrashReport.initCrashReport(getApplicationContext());
     }
 
     public static boolean sIsCoolStart;

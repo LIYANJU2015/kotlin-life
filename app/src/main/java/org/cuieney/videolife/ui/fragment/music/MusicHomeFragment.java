@@ -2,18 +2,25 @@ package org.cuieney.videolife.ui.fragment.music;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.transition.Fade;
 import android.transition.Slide;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseFragment;
 import org.cuieney.videolife.common.component.EventUtil;
+import org.cuieney.videolife.common.utils.Utils;
+import org.cuieney.videolife.data.MangoDataHandler;
 import org.cuieney.videolife.entity.MusicListBean;
 import org.cuieney.videolife.presenter.MusicHomePresenter;
 import org.cuieney.videolife.presenter.contract.MusicHomeContract;
@@ -29,19 +36,19 @@ import butterknife.BindView;
  * Created by cuieney on 17/3/4.
  */
 
-public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implements MusicHomeContract.View  {
+public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implements MusicHomeContract.View, MangoDataHandler.CallBack {
 
     @BindView(R.id.recycler)
     RecyclerView recycler;
-    @BindView(R.id.refresh)
-    SwipeRefreshLayout refresh;
     @BindView(R.id.loading_mb)
     ProgressBar loadingPB;
     @BindView(R.id.error_tv)
     TextView errorTv;
 
-    private List<MusicListBean> mMusicList;
+    private List<MusicListBean> mMusicList = null;
     private MusicAdapter adapter;
+
+    private Handler mMainHandler = new Handler(Looper.getMainLooper());
 
     public static MusicHomeFragment newInstance(int type, String query) {
         Bundle bundle = new Bundle();
@@ -50,6 +57,13 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
         MusicHomeFragment musicHomeFragment = new MusicHomeFragment();
         musicHomeFragment.setArguments(bundle);
         return musicHomeFragment;
+    }
+
+    public void setArguments(int type, String query) {
+        this.type = type;
+        this.query = query;
+
+        initEventAndData();
     }
 
     public static MusicHomeFragment newInstance() {
@@ -69,38 +83,35 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
         return R.layout.music_home_fragment;
     }
 
-    private int type;
+    public int type;
     private String query;
 
     @Override
-    protected void initEventAndData() {
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("type", type);
+        outState.putString("query", query);
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         type = getArguments().getInt("type");
         query = getArguments().getString("query");
+    }
 
-        refresh.setProgressViewOffset(false,100,200);
-        refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                if (type == MusicHomeContract.SEARCH_SOUDN_CLOUD_TYPE) {
-                    mPresenter.getSearchMusicList(query);
-                } else {
-                    mPresenter.getMusicData();
-                }
-            }
-        });
+    @Override
+    protected void initEventAndData() {
 
-        GridLayoutManager layout = new GridLayoutManager(getActivity(), 2);
+        RecyclerView.LayoutManager layout;
+        if (type == MusicFragment.SONGS_TYPE || type == MusicFragment.SONGS_SEARCH_TYPE) {
+            layout = new LinearLayoutManager(getActivity());
+        } else {
+            layout = new GridLayoutManager(getActivity(), 2);
+        }
         recycler.setLayoutManager(layout);
-//        recycler.addOnScrollListener(new EndLessOnScrollListener(layout,1) {
-//            @Override
-//            public void onLoadMore() {
-//                if (type == MusicHomeContract.Search_SOUDN_CLOUD_TYPE) {
-//                    mPresenter.getMusicData();
-//                }
-//            }
-//        });
-        mMusicList = new ArrayList<>();
-        adapter = new MusicAdapter(getActivity(),mMusicList);
+
+        adapter = new MusicAdapter(getActivity(),null, layout instanceof GridLayoutManager);
         recycler.setAdapter(adapter);
         adapter.setOnItemClickListener((position, view, vh) -> {
             startChildFragment(mMusicList.get(position), vh);
@@ -108,12 +119,48 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
 
         loadingPB.setVisibility(View.VISIBLE);
 
-        if (type == MusicHomeContract.SEARCH_SOUDN_CLOUD_TYPE) {
-            mPresenter.getSearchMusicList(query);
-        } else {
-            mPresenter.getMusicData();
+        Utils.runSingleThread(new Runnable() {
+            @Override
+            public void run() {
+                if (type == MusicFragment.SONGS_TYPE || type == MusicFragment.SONGS_SEARCH_TYPE) {
+                    MangoDataHandler.registerSongDataListener(MusicHomeFragment.this);
+                } else if (type == MusicFragment.ARTISTS_TYPE || type == MusicFragment.ARTISTS_SEARCH_TYPE) {
+                    MangoDataHandler.registerArtistsDataListener(MusicHomeFragment.this);
+                } else {
+                    MangoDataHandler.registerAlbumDataListener(MusicHomeFragment.this);
+                }
+            }
+        });
+
+    }
+
+    @Override
+    public void onCallBack(final ArrayList<MusicListBean> list) {
+        if (!isAdded()) {
+            return;
         }
 
+        switch (type) {
+            case MusicFragment.ALBUM_SEARCH_TYPE:
+                mMusicList = MangoDataHandler.searchData(list, query);
+                break;
+            case MusicFragment.ARTISTS_SEARCH_TYPE:
+                mMusicList = MangoDataHandler.searchData(list, query);
+                break;
+            case MusicFragment.SONGS_SEARCH_TYPE:
+                mMusicList = MangoDataHandler.searchData(list, query);
+                break;
+            default:
+                mMusicList = list;
+                break;
+        }
+
+        mMainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                showContent(mMusicList);
+            }
+        });
     }
 
     @Override
@@ -121,18 +168,7 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
         loadingPB.setVisibility(View.GONE);
         errorTv.setVisibility(View.GONE);
 
-//        musicListBean.add(0,new MusicListBean());
-//        musicListBean.add(0,new MusicListBean());
-        if (refresh.isRefreshing()) {
-            refresh.setRefreshing(false);
-            adapter.clear();
-            mMusicList.clear();
-            adapter.addAll(musicListBean);
-            recycler.setAdapter(adapter);
-        }else{
-            adapter.addAll(musicListBean);
-        }
-        mMusicList.addAll(musicListBean);
+        adapter.addAll(musicListBean);
     }
 
 
@@ -159,8 +195,14 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
         start(fragment);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
 
-
+        MangoDataHandler.unRegisterAlbumDataListener();
+        MangoDataHandler.unRegisterArtistsDataListener();
+        MangoDataHandler.unRegisterSongDataListener();
+    }
 
     @Override
     public void error(Throwable throwable) {

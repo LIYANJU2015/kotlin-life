@@ -8,7 +8,7 @@ android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
-        applicationId "com.gotubemaster.playtube"
+        applicationId "com.gomusic.mangomusic"
         minSdkVersion 19
         targetSdkVersion 22
         versionCode 1
