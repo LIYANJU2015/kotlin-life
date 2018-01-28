@@ -9,7 +9,7 @@ android {
     buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "com.gomusic.mangomusic"
-        minSdkVersion 19
+        minSdkVersion 16
         targetSdkVersion 22
         versionCode 1
         versionName "1.0.0"
@@ -27,16 +27,18 @@ android {
     signingConfigs {
         release {
             storeFile file("keystore")
-            storePassword "123456"
-            keyAlias "qwer"
-            keyPassword "123456"
+            storePassword "1234asdf"
+            keyAlias "key123"
+            keyPassword "1234asdf"
         }
     }
 
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled true
+            shrinkResources true
+            zipAlignEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
     }

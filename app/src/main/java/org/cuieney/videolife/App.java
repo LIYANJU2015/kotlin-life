@@ -162,6 +162,8 @@ public class App extends Application {
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
 
+        LogUtil.d(" result time1111:::" + (System.currentTimeMillis() - startTime));
+
         if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("addShortcut", false)) {
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("addShortcut", true).apply();
             addShortcut(app, MainActivity.class, getString(R.string.app_name), R.mipmap.ic_launcher);
@@ -186,7 +188,7 @@ public class App extends Application {
 
             @Override
             public String getAppId() {
-                return "ca-app-pub-9880857526519562~2748080363";
+                return "ca-app-pub-9880857526519562~6925594520";
             }
 
             @Override
@@ -206,12 +208,12 @@ public class App extends Application {
 
             @Override
             public String getBannerAdId() {
-                return "ca-app-pub-9880857526519562/3592180757";
+                return "ca-app-pub-9880857526519562/9804051063";
             }
 
             @Override
             public String getInterstitialAdId() {
-                return "ca-app-pub-9880857526519562/7423614552";
+                return "ca-app-pub-9880857526519562/9428646546";
             }
 
             @Override
@@ -235,10 +237,10 @@ public class App extends Application {
 
         sIsCoolStart = true;
 
-        CrashReport.initCrashReport(getApplicationContext());
-        LogUtil.d(" result time:::" + (System.currentTimeMillis() - startTime));
+        CrashReport.initCrashReport(getApplicationContext(), "1add7eca79", false);
 
         AdModule.getInstance().getFacebookAd().loadAds(Constants.NATIVE_LIST_ITEM_ADID);
+
     }
 
     public static boolean sIsCoolStart;

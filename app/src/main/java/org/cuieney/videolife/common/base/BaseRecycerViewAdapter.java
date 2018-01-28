@@ -63,6 +63,10 @@ public abstract class BaseRecycerViewAdapter<T,V extends RecyclerView.ViewHolder
         addAll(list.size(), collection);
     }
 
+    public void addAll2(Collection<? extends T> collection) {
+        list.addAll(list.size(), collection);
+    }
+
     public void addAll(int position, Collection<? extends T> collection) {
         if (mParentAdapter != null) {
             int postionStart = mParentAdapter.getItemCount();

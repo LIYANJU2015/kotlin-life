@@ -2,9 +2,11 @@ package org.cuieney.videolife.ui.act;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Handler;
 import android.speech.RecognizerIntent;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -14,12 +16,14 @@ import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
+import com.ashokvarma.bottomnavigation.TextBadgeItem;
 import com.facebook.ads.NativeAd;
 import com.jaeger.library.StatusBarUtil;
 import com.rating.RatingActivity;
 
 import org.cuieney.videolife.App;
 import org.cuieney.videolife.FacebookReportUtils;
+import org.cuieney.videolife.FileDownloaderHelper;
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseMainFragment;
 import org.cuieney.videolife.common.base.SimpleActivity;
@@ -29,6 +33,7 @@ import org.cuieney.videolife.common.utils.LogUtil;
 import org.cuieney.videolife.common.utils.PreferenceUtil;
 import org.cuieney.videolife.common.utils.Utils;
 import org.cuieney.videolife.presenter.contract.MusicHomeContract;
+import org.cuieney.videolife.provider.DownloadDao;
 import org.cuieney.videolife.ui.fragment.music.DownloadFragment;
 import org.cuieney.videolife.ui.fragment.music.MusicFragment;
 import org.greenrobot.eventbus.Subscribe;
@@ -36,7 +41,6 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
 import butterknife.BindView;
 import me.yokeyword.fragmentation.SupportFragment;
 import me.yokeyword.fragmentation.helper.FragmentLifecycleCallbacks;
@@ -171,7 +175,42 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
             AdModule.getInstance().getAdMob().requestNewInterstitial();
             AdModule.getInstance().getFacebookAd().loadAd(false, Constants.NATIVE_LIST_ITEM_ADID);
         }
+
+        FileDownloaderHelper.registerDownloadFinishListener(runnable);
     }
+
+    private volatile int downloadNumber;
+
+    private Handler handler = new Handler();
+
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            downloadNumber = DownloadDao.getNewDownloadCount(mContext);
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (isFinishing()) {
+                        return;
+                    }
+
+                    try {
+                        if (numberBadgeItem != null) {
+                            numberBadgeItem.setText(downloadNumber != 0 ? String.valueOf(downloadNumber) : "");
+                            LogUtil.d("downloadNumber " + downloadNumber);
+                            if (downloadNumber > 0) {
+                                numberBadgeItem.show();
+                            } else {
+                                numberBadgeItem.hide();
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, 1000);
+        }
+    };
 
     private void doSearch(String query) {
         mSearchView.clearQuery();
@@ -189,7 +228,19 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
     private int currentType = MusicFragment.ALBUM_SEARCH_TYPE;
     private int currentPostion;
 
+    private TextBadgeItem numberBadgeItem;
+
     private void initView() {
+
+        mNavigationView.clearAll();
+
+        numberBadgeItem = new TextBadgeItem()
+                .setBorderWidth(2)
+                .setBackgroundColorResource(R.color.colorAccent)
+                .setGravity(Gravity.TOP | Gravity.END)
+                .hide()
+                .setHideOnSelect(true);
+
         mNavigationView
                 .addItem(new BottomNavigationItem(R.drawable.ic_album_black, R.string.main_album_text)
                         .setActiveColorResource(R.color.colorPrimary))
@@ -198,6 +249,7 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
                 .addItem(new BottomNavigationItem(R.drawable.ic_song_black, R.string.main_song_text)
                         .setActiveColorResource(R.color.colorPrimary))
                 .addItem(new BottomNavigationItem(R.drawable.ic_main_bt_download, R.string.main_download_text)
+                        .setBadgeItem(numberBadgeItem)
                         .setActiveColorResource(R.color.colorPrimary))
                 .initialise();
         mNavigationView.setMode(MODE_FIXED);
@@ -206,6 +258,7 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
         mNavigationView.setTabSelectedListener(new BottomNavigationBar.OnTabSelectedListener() {
             @Override
             public void onTabSelected(int position) {
+                LogUtil.d("onTabSelected position " + position);
                 showHideFragment(mFragments.get(position));
                 currentPostion = position;
 
@@ -213,7 +266,20 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
 
                 if (position == 3) {
                     mSearchView.setVisibility(View.INVISIBLE);
+
+                    if (downloadNumber > 0) {
+                        downloadNumber = 0;
+                        Utils.runSingleThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                DownloadDao.updateDownloadNew(mContext);
+                            }
+                        });
+                    }
                 } else {
+                    if (downloadNumber == 0) {
+                        numberBadgeItem.hide();
+                    }
                     mSearchView.setVisibility(View.VISIBLE);
                 }
 
@@ -239,6 +305,8 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
             }
         });
         isShowRating = PreferenceUtil.getInstance(this).isShowRating();
+
+        Utils.runSingleThread(runnable);
     }
 
     private boolean isShowRating = false;
@@ -294,6 +362,8 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
     public void onDestroy() {
         super.onDestroy();
         EventUtil.unregister(this);
+        FileDownloaderHelper.removeDownloadFinishListener(null);
+        AdModule.getInstance().getFacebookAd().setLoadListener(null);
     }
 
     @Override

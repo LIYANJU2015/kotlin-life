@@ -121,6 +121,8 @@ public class FileDownloaderHelper {
                         RatingActivity.setPopTotalCount(App.getInstance(), 2);
                         RatingActivity.launch(App.getInstance(), null,
                                 App.getInstance().getString(R.string.star_five_text));
+
+                        FacebookReportUtils.logDownloadFinished(song.getSongname());
                     } else {
                         File file = new File(task.getPath());
                         if (file.exists()) {

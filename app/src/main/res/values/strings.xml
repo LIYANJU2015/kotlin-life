@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Play Tube</string>
+    <string name="app_name">Mp3 Music Downloader</string>
     <string name="image_transition">image_transition</string>
 
 
@@ -67,8 +67,8 @@
 
     <string name="start_speech">Start speech</string>
 
-    <string name="facebook_app_id">146773445984805</string>
-    <string name="fb_login_protocol_scheme">fb146773445984805</string>
+    <string name="facebook_app_id">168069277148914</string>
+    <string name="fb_login_protocol_scheme">fb168069277148914</string>
 
     <string name="main_album_text">Albums</string>
     <string name="main_artists_text">Artists</string>

@@ -18,6 +18,7 @@ import com.admodule.AdModule;
 import com.facebook.ads.AdChoicesView;
 import com.facebook.ads.NativeAd;
 
+import org.cuieney.videolife.FacebookReportUtils;
 import org.cuieney.videolife.FileDownloaderHelper;
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.entity.wyBean.TracksBean;
@@ -59,6 +60,7 @@ public class DownloadBottomSheetDialog extends BaseBottomSheetFragment {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                FacebookReportUtils.logSongDownload(mSong.title);
             }
         });
 
@@ -73,6 +75,7 @@ public class DownloadBottomSheetDialog extends BaseBottomSheetFragment {
                     Intent it = new Intent(Intent.ACTION_VIEW);
                     it.setDataAndType(Uri.parse(mSong.getFilename()), mimeType);
                     startActivity(it);
+                    FacebookReportUtils.logSongPlay(mSong.title);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -119,8 +122,12 @@ public class DownloadBottomSheetDialog extends BaseBottomSheetFragment {
     }
 
     public void showBottomSheetFragment(FragmentManager manager) {
-        if (manager.findFragmentByTag(DownloadBottomSheetDialog.class.getName()) == null) {
-            show(manager, DownloadBottomSheetDialog.class.getName());
+        try {
+            if (manager.findFragmentByTag(DownloadBottomSheetDialog.class.getName()) == null) {
+                show(manager, DownloadBottomSheetDialog.class.getName());
+            }
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
     }
 }

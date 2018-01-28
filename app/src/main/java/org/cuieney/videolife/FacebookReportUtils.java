@@ -17,6 +17,27 @@ public class FacebookReportUtils {
         logger.logEvent("pageShow",bundle);
     }
 
+    public static void logDownloadFinished(String title)  {
+        AppEventsLogger logger = AppEventsLogger.newLogger(App.getInstance());
+        Bundle bundle = new Bundle();
+        bundle.putString("title", title);
+        logger.logEvent("downloadFinished",bundle);
+    }
+
+    public static void logSongPlay(String title)  {
+        AppEventsLogger logger = AppEventsLogger.newLogger(App.getInstance());
+        Bundle bundle = new Bundle();
+        bundle.putString("title", title);
+        logger.logEvent("songPlay",bundle);
+    }
+
+    public static void logSongDownload(String title)  {
+        AppEventsLogger logger = AppEventsLogger.newLogger(App.getInstance());
+        Bundle bundle = new Bundle();
+        bundle.putString("title", title);
+        logger.logEvent("songDownload",bundle);
+    }
+
     public static void logSentFBAdShow(String page)  {
         AppEventsLogger logger = AppEventsLogger.newLogger(App.getInstance());
         Bundle bundle = new Bundle();

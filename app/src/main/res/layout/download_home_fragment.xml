@@ -1,9 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar_layout"
+            app:layout_scrollFlags="scroll|enterAlways"
+            android:background="@color/material_white"
+            app:titleMargin="0dp"
+            app:contentInsetStart="0dp"
+            android:padding="5dp"
+            android:layout_margin="0dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler"
@@ -14,4 +33,4 @@
 
     <include layout="@layout/empty_error_layout"/>
 
-</FrameLayout>
+</android.support.design.widget.CoordinatorLayout>

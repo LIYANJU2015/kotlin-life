@@ -14,13 +14,24 @@ import android.transition.Slide;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.admodule.AdModule;
+import com.admodule.admob.AdMobBanner;
+import com.facebook.ads.Ad;
+import com.facebook.ads.AdChoicesView;
+import com.facebook.ads.NativeAd;
+import com.google.android.gms.ads.AdListener;
+
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseFragment;
 import org.cuieney.videolife.common.component.EventUtil;
+import org.cuieney.videolife.common.utils.AdViewWrapperAdapter;
+import org.cuieney.videolife.common.utils.Constants;
 import org.cuieney.videolife.common.utils.LogUtil;
 import org.cuieney.videolife.common.utils.Utils;
 import org.cuieney.videolife.data.MangoDataHandler;
@@ -98,6 +109,8 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
+    private AdViewWrapperAdapter adViewWrapperAdapter;
+
     @Override
     protected void initEventAndData() {
         LogUtil.d("initEventAndData type: " + type);
@@ -110,7 +123,14 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
         recycler.setLayoutManager(layout);
 
         adapter = new MusicAdapter(getActivity(),null, layout instanceof GridLayoutManager);
-        recycler.setAdapter(adapter);
+
+        if (type == MusicFragment.SONGS_TYPE || type == MusicFragment.SONGS_SEARCH_TYPE) {
+            adViewWrapperAdapter = new AdViewWrapperAdapter(adapter);
+            recycler.setAdapter(adViewWrapperAdapter);
+        } else {
+            recycler.setAdapter(adapter);
+        }
+
         adapter.setOnItemClickListener((position, view, vh) -> {
             if (type == MusicFragment.SONGS_TYPE || type == MusicFragment.SONGS_SEARCH_TYPE) {
                 DownloadBottomSheetDialog.newInstance(mMusicList.get(position).getTracks().get(0))
@@ -135,6 +155,11 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
             }
         });
 
+        if (type == MusicFragment.SONGS_TYPE || type == MusicFragment.SONGS_SEARCH_TYPE) {
+            AdModule.getInstance().getFacebookAd().loadAd(false,
+                    Constants.NATIVE_LIST_ITEM_ADID);
+            initBannerView();
+        }
     }
 
     @Override
@@ -166,6 +191,63 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
         });
     }
 
+    private AdMobBanner adMobBanner;
+
+    private void initBannerView() {
+        adMobBanner = AdModule.getInstance().getAdMob().createBannerAdView();
+        adMobBanner.setAdRequest(AdModule.getInstance().getAdMob().createAdRequest());
+        adMobBanner.setAdListener(new AdListener(){
+            @Override
+            public void onAdLoaded() {
+                super.onAdLoaded();
+                if (getActivity() != null && getActivity().isFinishing()) {
+                    return;
+                }
+
+                if (!isAdded()) {
+                    return;
+                }
+
+                if (adMobBanner != null && !adViewWrapperAdapter.isAddAdView() && adapter.getItemCount() > 4) {
+                    adMobBanner.getAdView().setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT,
+                            RecyclerView.LayoutParams.WRAP_CONTENT));
+                    adViewWrapperAdapter.addAdView(22,
+                            new AdViewWrapperAdapter.AdViewItem( adMobBanner.getAdView(), 4));
+                    adViewWrapperAdapter.notifyItemInserted(4);
+                }
+            }
+        });
+    }
+
+    private View setUpNativeAdView(NativeAd nativeAd) {
+        nativeAd.unregisterView();
+
+        View adView = LayoutInflater.from(getActivity()).inflate(R.layout.home_list_ad_item3, recycler, false);
+
+        FrameLayout adChoicesFrame = (FrameLayout) adView.findViewById(R.id.fb_adChoices2);
+        ImageView nativeAdIcon = (ImageView) adView.findViewById(R.id.image_ad);
+        TextView nativeAdTitle = (TextView) adView.findViewById(R.id.title);
+        TextView nativeAdBody = (TextView) adView.findViewById(R.id.text);
+        TextView nativeAdCallToAction = (TextView) adView.findViewById(R.id.call_btn_tv);
+
+        nativeAdCallToAction.setText(nativeAd.getAdCallToAction());
+        nativeAdTitle.setText(nativeAd.getAdTitle());
+        nativeAdBody.setText(nativeAd.getAdBody());
+
+        // Downloading and setting the ad icon.
+        NativeAd.Image adIcon = nativeAd.getAdIcon();
+        NativeAd.downloadAndDisplayImage(adIcon, nativeAdIcon);
+
+        // Add adChoices icon
+        AdChoicesView adChoicesView = new AdChoicesView(getActivity(), nativeAd, true);
+        adChoicesFrame.addView(adChoicesView, 0);
+        adChoicesFrame.setVisibility(View.VISIBLE);
+
+        nativeAd.registerViewForInteraction(adView);
+
+        return adView;
+    }
+
     @Override
     public void showContent(List<MusicListBean> musicListBean) {
         if (musicListBean.size() == 0) {
@@ -176,9 +258,42 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
             errorTv.setVisibility(View.GONE);
         }
 
-        adapter.addAll(musicListBean);
+        if (type == MusicFragment.SONGS_TYPE || type == MusicFragment.SONGS_SEARCH_TYPE) {
+            int positionStart = adViewWrapperAdapter.getItemCount();
+            adapter.addAll2(musicListBean);
+            NativeAd nativeAd = AdModule.getInstance().getFacebookAd().getNativeAd();
+            if (nativeAd == null || !nativeAd.isAdLoaded()) {
+                nativeAd = AdModule.getInstance().getFacebookAd().nextNativieAd();
+            }
+
+            if (nativeAd != null && nativeAd.isAdLoaded()
+                    && !adViewWrapperAdapter.isAddAdView() && adapter.getItemCount() > 4) {
+                adViewWrapperAdapter.addAdView(22,
+                        new AdViewWrapperAdapter.AdViewItem(setUpNativeAdView(nativeAd), 4));
+            }
+
+            adViewWrapperAdapter.notifyItemRangeInserted(positionStart,
+                    adViewWrapperAdapter.getItemCount());
+        } else {
+            adapter.addAll(musicListBean);
+        }
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (adMobBanner != null) {
+            adMobBanner.pause();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (adMobBanner != null) {
+            adMobBanner.resume();
+        }
+    }
 
     private void startChildFragment(MusicListBean musicListBean, RecyclerView.ViewHolder vh) {
         EventUtil.sendEvent(true + "");
@@ -210,6 +325,11 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
         MangoDataHandler.unRegisterAlbumDataListener();
         MangoDataHandler.unRegisterArtistsDataListener();
         MangoDataHandler.unRegisterSongDataListener();
+
+        if (adMobBanner != null) {
+            adMobBanner.destroy();
+            adMobBanner = null;
+        }
     }
 
     @Override
