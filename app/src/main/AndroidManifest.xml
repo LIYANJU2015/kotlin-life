@@ -60,7 +60,7 @@
         </activity>
 
         <provider
-            android:authorities="org.cuieney.videolife.provider"
+            android:authorities="org.cuieney.videolife.ytbprovider"
             android:name="org.cuieney.videolife.provider.DownloadProvider"/>
 
         <!-- 配置APP ID -->

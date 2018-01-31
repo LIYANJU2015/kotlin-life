@@ -80,11 +80,11 @@ public abstract class BaseRecycerViewAdapter<T,V extends RecyclerView.ViewHolder
 
     public void clear() {
         list.clear();
-        if (mParentAdapter != null) {
-            mParentAdapter.notifyDataSetChanged();
-        } else {
-            notifyDataSetChanged();
-        }
+//        if (mParentAdapter != null) {
+//            mParentAdapter.notifyDataSetChanged();
+//        } else {
+//            notifyDataSetChanged();
+//        }
     }
 
     @Override

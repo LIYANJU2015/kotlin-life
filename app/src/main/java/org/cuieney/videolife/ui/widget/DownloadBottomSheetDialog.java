@@ -21,6 +21,7 @@ import com.facebook.ads.NativeAd;
 import org.cuieney.videolife.FacebookReportUtils;
 import org.cuieney.videolife.FileDownloaderHelper;
 import org.cuieney.videolife.R;
+import org.cuieney.videolife.entity.MusicListBean;
 import org.cuieney.videolife.entity.wyBean.TracksBean;
 
 /**
@@ -29,7 +30,7 @@ import org.cuieney.videolife.entity.wyBean.TracksBean;
 
 public class DownloadBottomSheetDialog extends BaseBottomSheetFragment {
 
-    public static DownloadBottomSheetDialog newInstance(TracksBean tracksBean) {
+    public static DownloadBottomSheetDialog newInstance(MusicListBean tracksBean) {
         DownloadBottomSheetDialog fragment = new DownloadBottomSheetDialog();
         Bundle bundle = new Bundle();
         bundle.putParcelable("song", tracksBean);
@@ -37,7 +38,7 @@ public class DownloadBottomSheetDialog extends BaseBottomSheetFragment {
         return fragment;
     }
 
-    private TracksBean mSong;
+    private MusicListBean mSong;
 
     @Override
     public int getLayoutResId() {
@@ -49,7 +50,7 @@ public class DownloadBottomSheetDialog extends BaseBottomSheetFragment {
         mSong = getArguments().getParcelable("song");
 
         TextView titleTV = (TextView) rootView.findViewById(R.id.title_tv);
-        titleTV.setText(mSong.getSongname());
+        titleTV.setText(mSong.name);
 
         rootView.findViewById(R.id.download_linear).setOnClickListener(new View.OnClickListener(){
             @Override
@@ -60,7 +61,7 @@ public class DownloadBottomSheetDialog extends BaseBottomSheetFragment {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                FacebookReportUtils.logSongDownload(mSong.title);
+                FacebookReportUtils.logSongDownload(mSong.name);
             }
         });
 
@@ -69,13 +70,13 @@ public class DownloadBottomSheetDialog extends BaseBottomSheetFragment {
             public void onClick(View view) {
                 dismiss();
                 try {
-                    String extension = MimeTypeMap.getFileExtensionFromUrl(mSong.getFilename());
+                    String extension = MimeTypeMap.getFileExtensionFromUrl(mSong.audiodownload);
                     String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
 
                     Intent it = new Intent(Intent.ACTION_VIEW);
-                    it.setDataAndType(Uri.parse(mSong.getFilename()), mimeType);
+                    it.setDataAndType(Uri.parse(mSong.audiodownload), mimeType);
                     startActivity(it);
-                    FacebookReportUtils.logSongPlay(mSong.title);
+                    FacebookReportUtils.logSongPlay(mSong.name);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

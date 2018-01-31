@@ -73,6 +73,7 @@
     <string name="main_album_text">Albums</string>
     <string name="main_artists_text">Artists</string>
     <string name="main_song_text">Songs</string>
+    <string name="main_search_text">Search</string>
     <string name="main_download_text">Downloads</string>
     <string name="download_text">Download</string>
     <string name="play_text">Play</string>

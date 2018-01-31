@@ -16,7 +16,7 @@ import java.util.Map;
 public class DownloadProvider extends BaseContentProvider {
 
     public static final int DOWNLOADEDKEY = 101;
-    public static final String AUTHORITIES = "org.cuieney.videolife.provider";
+    public static final String AUTHORITIES = "org.cuieney.videolife.ytbprovider";
     public static final String DATA_BASE = "download";
 
     @Override

@@ -102,16 +102,11 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
     @Override
     protected void initEventAndData() {
         mFragments = new ArrayList<>();
-        mFragments.add(MusicFragment.newInstance(MusicFragment.ALBUM_TYPE));
-        mFragments.add(MusicFragment.newInstance(MusicFragment.ARTISTS_TYPE));
-        mFragments.add(MusicFragment.newInstance(MusicFragment.SONGS_TYPE));
+        mFragments.add(MusicFragment.newInstance());
         mFragments.add(DownloadFragment.newInstance());
         loadMultipleRootFragment(R.id.act_container, 0
                 , mFragments.get(0)
                 , mFragments.get(1)
-                , mFragments.get(2)
-                , mFragments.get(3)
-
         );
 
         initView();
@@ -214,10 +209,9 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
 
     private void doSearch(String query) {
         mSearchView.clearQuery();
-        LogUtil.d("onSearchAction currentType " + currentType);
         SupportFragment supportFragment = mFragments.get(currentPostion);
         if (supportFragment instanceof MusicFragment) {
-            ((MusicFragment) supportFragment).addSearchFragment(currentType, query);
+            ((MusicFragment) supportFragment).addSearchFragment(query);
         }
         FacebookReportUtils.logSentPageShow("search soundcloud query " + query);
 
@@ -225,7 +219,6 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
 
     public static int sCurrentStatusColor = ContextCompat.getColor(App.getInstance(), R.color.colorPrimary);
 
-    private int currentType = MusicFragment.ALBUM_SEARCH_TYPE;
     private int currentPostion;
 
     private TextBadgeItem numberBadgeItem;
@@ -242,18 +235,16 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
                 .setHideOnSelect(true);
 
         mNavigationView
-                .addItem(new BottomNavigationItem(R.drawable.ic_album_black, R.string.main_album_text)
-                        .setActiveColorResource(R.color.colorPrimary))
-                .addItem(new BottomNavigationItem(R.drawable.ic_artist_black, R.string.main_artists_text)
-                        .setActiveColorResource(R.color.colorPrimary))
-                .addItem(new BottomNavigationItem(R.drawable.ic_song_black, R.string.main_song_text)
-                        .setActiveColorResource(R.color.colorPrimary))
+                .addItem(new BottomNavigationItem(R.drawable.ic_main_search, R.string.main_search_text)
+                        .setActiveColorResource(R.color.colorPrimary)
+                        )
                 .addItem(new BottomNavigationItem(R.drawable.ic_main_bt_download, R.string.main_download_text)
                         .setBadgeItem(numberBadgeItem)
-                        .setActiveColorResource(R.color.colorPrimary))
+                                .setActiveColorResource(R.color.colorPrimary)
+                        )
                 .initialise();
         mNavigationView.setMode(MODE_FIXED);
-        mNavigationView.setBackgroundStyle(BACKGROUND_STYLE_RIPPLE);
+        mNavigationView.setBackgroundStyle(BACKGROUND_STYLE_STATIC);
         mNavigationView.setAutoHideEnabled(true);
         mNavigationView.setTabSelectedListener(new BottomNavigationBar.OnTabSelectedListener() {
             @Override
@@ -264,7 +255,7 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
 
                 StatusBarUtil.setColor(MainActivity.this, sCurrentStatusColor, 255);
 
-                if (position == 3) {
+                if (position == 1) {
                     mSearchView.setVisibility(View.INVISIBLE);
 
                     if (downloadNumber > 0) {
@@ -281,18 +272,6 @@ public class MainActivity extends SimpleActivity implements BaseMainFragment.OnB
                         numberBadgeItem.hide();
                     }
                     mSearchView.setVisibility(View.VISIBLE);
-                }
-
-                switch (position) {
-                    case 0:
-                        currentType = MusicFragment.ALBUM_SEARCH_TYPE;
-                        break;
-                    case 1:
-                        currentType = MusicFragment.ARTISTS_SEARCH_TYPE;
-                        break;
-                    case 2:
-                        currentType = MusicFragment.SONGS_SEARCH_TYPE;
-                        break;
                 }
             }
 

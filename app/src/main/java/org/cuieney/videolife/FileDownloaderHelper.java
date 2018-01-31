@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.liulishuo.filedownloader.FileDownloader;
@@ -22,6 +23,7 @@ import org.cuieney.videolife.common.utils.LogUtil;
 import org.cuieney.videolife.common.utils.ToastUtil;
 import org.cuieney.videolife.common.utils.Utils;
 import org.cuieney.videolife.entity.DownloadSong;
+import org.cuieney.videolife.entity.MusicListBean;
 import org.cuieney.videolife.entity.wyBean.TracksBean;
 import org.cuieney.videolife.provider.DownloadDao;
 import org.cuieney.videolife.ui.act.MainActivity;
@@ -40,7 +42,14 @@ public class FileDownloaderHelper {
             App.getInstance().getString(R.string.app_name));
     private static Context sContext = App.getInstance();
 
-    public static void addDownloadTask(TracksBean song) {
+    public static void addDownloadTask(String name, String downloadurl) {
+        MusicListBean listBean = new MusicListBean();
+        listBean.name = name;
+        listBean.audiodownload = downloadurl;
+        addDownloadTask(listBean);
+    }
+
+    public static void addDownloadTask(MusicListBean song) {
         if (song == null) {
             return;
         }
@@ -57,23 +66,23 @@ public class FileDownloaderHelper {
             defaultfile.mkdirs();
         }
 
-        String path = defaultfile + File.separator + String.valueOf(song.getSongname()) + ".mp3";
+        String path = defaultfile + File.separator + String.valueOf(song.name) + ".mp3";
 
-        int createDownloadId = FileDownloadUtils.generateId(song.getFilename(), path);
+        int createDownloadId = FileDownloadUtils.generateId(song.audiodownload, path);
         if (DownloadDao.getDownloadTaskById(sContext, createDownloadId) != null) {
             ToastUtil.showLongToastSafe(sContext.getString(R.string.download_added));
             return;
         }
 
-        FileDownloader.getImpl().create(song.getFilename())
+        FileDownloader.getImpl().create(song.audiodownload)
                 .setPath(path)
                 .setAutoRetryTimes(1)
                 .setTag(song)
                 .setListener(new SelfNotificationListener(new FileDownloadNotificationHelper()))
                 .start();
-        LogUtil.d(" stream_url::::" + song.getFilename());
+        LogUtil.d(" stream_url::::" + song.audiodownload);
 
-        ToastUtil.showLongToastSafe(song.getSongname() + " " + sContext.getString(R.string.download_add_success));
+        ToastUtil.showLongToastSafe(song.name + " " + sContext.getString(R.string.download_add_success));
     }
 
 
@@ -101,28 +110,28 @@ public class FileDownloaderHelper {
                 public void run() {
                     LogUtil.d("destroyNotification getStatus " + task.getStatus());
                     if (task.getStatus() == FileDownloadStatus.completed) {
-                        TracksBean song = (TracksBean) task.getTag();
+                        MusicListBean song = (MusicListBean) task.getTag();
                         String path = task.getPath();
                         int id = task.getId();
                         LogUtil.d("destroyNotification completed id :" + id + " getTitle:: "
-                                + song.getSongname() + " path " + path);
+                                + song.name + " path " + path);
 
-                        ToastUtil.showLongToastSafe(song.getSongname() + " " + sContext.getString(R.string.download_video_success));
+                        ToastUtil.showLongToastSafe(song.name + " " + sContext.getString(R.string.download_video_success));
 
-                        DownloadSong downloadSong = new DownloadSong(song.getSongname(),
-                                "", song.getSonger(), path, 0,
-                                song.getSongphoto(), id, true);
+                        DownloadSong downloadSong = new DownloadSong(song.name,
+                                "", song.artist_name, path, 0,
+                                song.image, id, true);
                         DownloadDao.addDownloadTask(sContext, downloadSong);
 
                         notifiyDownloadFinished();
 
-                        showCompletedNotification(task.getId(), song.getSongname());
+                        showCompletedNotification(task.getId(), song.name);
 
                         RatingActivity.setPopTotalCount(App.getInstance(), 2);
                         RatingActivity.launch(App.getInstance(), null,
                                 App.getInstance().getString(R.string.star_five_text));
 
-                        FacebookReportUtils.logDownloadFinished(song.getSongname());
+                        FacebookReportUtils.logDownloadFinished(song.name);
                     } else {
                         File file = new File(task.getPath());
                         if (file.exists()) {

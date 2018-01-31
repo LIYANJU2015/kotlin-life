@@ -5,7 +5,9 @@ import android.app.Activity;
 
 import org.cuieney.videolife.di.PerFragment;
 import org.cuieney.videolife.di.module.FragmentModule;
+import org.cuieney.videolife.ui.fragment.music.MusicFragment;
 import org.cuieney.videolife.ui.fragment.music.MusicHomeFragment;
+import org.cuieney.videolife.ui.fragment.music.MusicSearchFragment;
 
 import dagger.Component;
 
@@ -19,5 +21,6 @@ public interface FragmentComponent {
 
     Activity getActivity();
 
-    void inject(MusicHomeFragment musicFragment);
+    void inject(MusicSearchFragment musicFragment);
+
 }

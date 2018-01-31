@@ -45,9 +45,9 @@ public class MusicAdapter extends BaseRecycerViewAdapter<MusicListBean, Recycler
             MyViewHoler viewHoler = (MyViewHoler) holder;
             MusicListBean musicListBean = list.get(position);
             ViewCompat.setTransitionName(viewHoler.imageView, String.valueOf(position) + "_image");
-            ImageLoader.loadAll(context, musicListBean.getOphoto(), viewHoler.imageView);
-            viewHoler.title.setText(musicListBean.getMname());
-            viewHoler.description.setText(musicListBean.getMdesc());
+            ImageLoader.loadAll(context, musicListBean.image, viewHoler.imageView);
+            viewHoler.title.setText(musicListBean.name);
+            viewHoler.description.setText(musicListBean.artist_name);
             viewHoler.itemView.setOnClickListener(v -> {
                 if (mClickListener != null) {
                     mClickListener.onItemClick(position,v,holder);

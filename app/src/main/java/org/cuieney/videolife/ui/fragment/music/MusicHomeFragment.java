@@ -1,89 +1,53 @@
 package org.cuieney.videolife.ui.fragment.music;
 
+import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.Nullable;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.annotation.RequiresApi;
 import android.support.v7.widget.RecyclerView;
-import android.transition.Fade;
-import android.transition.Slide;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.CookieManager;
+import android.webkit.DownloadListener;
+import android.webkit.URLUtil;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.admodule.AdModule;
 import com.admodule.admob.AdMobBanner;
-import com.facebook.ads.Ad;
 import com.facebook.ads.AdChoicesView;
 import com.facebook.ads.NativeAd;
 import com.google.android.gms.ads.AdListener;
 
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseFragment;
-import org.cuieney.videolife.common.component.EventUtil;
+import org.cuieney.videolife.common.net.NetWorkUtil;
 import org.cuieney.videolife.common.utils.AdViewWrapperAdapter;
-import org.cuieney.videolife.common.utils.Constants;
-import org.cuieney.videolife.common.utils.LogUtil;
-import org.cuieney.videolife.common.utils.Utils;
-import org.cuieney.videolife.data.MangoDataHandler;
-import org.cuieney.videolife.entity.MusicListBean;
-import org.cuieney.videolife.presenter.MusicHomePresenter;
-import org.cuieney.videolife.presenter.contract.MusicHomeContract;
-import org.cuieney.videolife.ui.adapter.MusicAdapter;
-import org.cuieney.videolife.common.base.DetailTransition;
-import org.cuieney.videolife.ui.widget.DownloadBottomSheetDialog;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import butterknife.BindView;
+import java.io.File;
 
 /**
  * Created by cuieney on 17/3/4.
  */
 
-public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implements MusicHomeContract.View, MangoDataHandler.CallBack {
+public class MusicHomeFragment extends BaseFragment {
 
-    @BindView(R.id.recycler)
-    RecyclerView recycler;
-    @BindView(R.id.loading_mb)
-    ProgressBar loadingPB;
-    @BindView(R.id.error_tv)
-    TextView errorTv;
-
-    private List<MusicListBean> mMusicList = null;
-    private MusicAdapter adapter;
-
-    private Handler mMainHandler = new Handler(Looper.getMainLooper());
-
-    public static MusicHomeFragment newInstance(int type, String query) {
-        Bundle bundle = new Bundle();
-        bundle.putInt("type", type);
-        bundle.putString("query", query);
-        MusicHomeFragment musicHomeFragment = new MusicHomeFragment();
-        musicHomeFragment.setArguments(bundle);
-        return musicHomeFragment;
-    }
-
-    public void setArguments(int type, String query) {
-        this.type = type;
-        this.query = query;
-
-        initEventAndData();
+    public static MusicHomeFragment newInstance() {
+        return new MusicHomeFragment();
     }
 
     @Override
     protected void initInject() {
-        getFragmentComponent().inject(this);
     }
 
     @Override
@@ -91,104 +55,157 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
         return R.layout.music_home_fragment;
     }
 
-    public int type;
-    private String query;
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt("type", type);
-        outState.putString("query", query);
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        type = getArguments().getInt("type");
-        query = getArguments().getString("query");
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     private AdViewWrapperAdapter adViewWrapperAdapter;
 
+    private ImageView searchIV;
+    private FrameLayout webContent;
+    private WebView webView;
+    private View webLinear;
+    private ProgressBar progressBar;
+
+    public static final String WEB_URL = "https://www.baidu.com/";
+
     @Override
     protected void initEventAndData() {
-        LogUtil.d("initEventAndData type: " + type);
-        RecyclerView.LayoutManager layout;
-        if (type == MusicFragment.SONGS_TYPE || type == MusicFragment.SONGS_SEARCH_TYPE) {
-            layout = new LinearLayoutManager(getActivity());
-        } else {
-            layout = new GridLayoutManager(getActivity(), 2);
-        }
-        recycler.setLayoutManager(layout);
+        searchIV = (ImageView) getView().findViewById(R.id.search_tip_iv);
+        webContent = (FrameLayout) getView().findViewById(R.id.webview_content);
+        webLinear = getView().findViewById(R.id.web_linear);
+        progressBar = (ProgressBar) getView().findViewById(R.id.wb_loading);
 
-        adapter = new MusicAdapter(getActivity(),null, layout instanceof GridLayoutManager);
+        addAndInitWebView();
+    }
 
-        if (type == MusicFragment.SONGS_TYPE || type == MusicFragment.SONGS_SEARCH_TYPE) {
-            adViewWrapperAdapter = new AdViewWrapperAdapter(adapter);
-            recycler.setAdapter(adViewWrapperAdapter);
-        } else {
-            recycler.setAdapter(adapter);
-        }
+    private void addAndInitWebView() {
+        searchIV.setVisibility(View.GONE);
+        webLinear.setVisibility(View.VISIBLE);
+        webView = new WebView(mContext);
+        webContent.addView(webView);
 
-        adapter.setOnItemClickListener((position, view, vh) -> {
-            if (type == MusicFragment.SONGS_TYPE || type == MusicFragment.SONGS_SEARCH_TYPE) {
-                DownloadBottomSheetDialog.newInstance(mMusicList.get(position).getTracks().get(0))
-                        .showBottomSheetFragment(getChildFragmentManager());
-            } else {
-                startChildFragment(mMusicList.get(position), vh);
+        initWebViewSettings(webView);
+
+        webView.setWebViewClient(new WebViewClient(){
+            @RequiresApi(api = 21)
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                super.onReceivedError(view, request, error);
+            }
+
+            @RequiresApi(api = 21)
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return shouldOverrideUrlLoading(view, request.getUrl() + "");
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(final WebView view, String url) {
+                return false;
+            }
+
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+            }
+
+            @Override
+            public void onPageFinished(WebView webView, String url) {
+                super.onPageFinished(webView, url);
             }
         });
 
-        loadingPB.setVisibility(View.VISIBLE);
-
-        Utils.runSingleThread(new Runnable() {
+        webView.setWebChromeClient(new WebChromeClient() {
             @Override
-            public void run() {
-                if (type == MusicFragment.SONGS_TYPE || type == MusicFragment.SONGS_SEARCH_TYPE) {
-                    MangoDataHandler.registerSongDataListener(MusicHomeFragment.this);
-                } else if (type == MusicFragment.ARTISTS_TYPE || type == MusicFragment.ARTISTS_SEARCH_TYPE) {
-                    MangoDataHandler.registerArtistsDataListener(MusicHomeFragment.this);
+            public void onProgressChanged(WebView view, int newProgress) {
+                if (newProgress == 100) {
+                    progressBar.setVisibility(View.GONE);//加载完网页进度条消失
                 } else {
-                    MangoDataHandler.registerAlbumDataListener(MusicHomeFragment.this);
+                    progressBar.setVisibility(View.VISIBLE);//开始加载网页时显示进度条
+                    progressBar.setProgress(newProgress);//设置进度值
                 }
             }
         });
 
-        if (type == MusicFragment.SONGS_TYPE || type == MusicFragment.SONGS_SEARCH_TYPE) {
-            AdModule.getInstance().getFacebookAd().loadAd(false,
-                    Constants.NATIVE_LIST_ITEM_ADID);
-            initBannerView();
-        }
+        webView.setDownloadListener(new DownloadListener() {
+            @Override
+            public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
+                String fileName  = URLUtil.guessFileName(url, contentDisposition, mimetype);
+            }
+        });
+
+        webView.loadUrl(WEB_URL);
     }
 
     @Override
-    public void onCallBack(final ArrayList<MusicListBean> list) {
-        if (!isAdded()) {
-            return;
-        }
+    public void onDestroy() {
+        super.onDestroy();
+        try {
+            if (webView != null) {
+                webView.getSettings().setBuiltInZoomControls(true);
+                webView.setVisibility(View.GONE);
 
-        switch (type) {
-            case MusicFragment.ALBUM_SEARCH_TYPE:
-                mMusicList = MangoDataHandler.searchData(list, query);
-                break;
-            case MusicFragment.ARTISTS_SEARCH_TYPE:
-                mMusicList = MangoDataHandler.searchData(list, query);
-                break;
-            case MusicFragment.SONGS_SEARCH_TYPE:
-                mMusicList = MangoDataHandler.searchData(list, query);
-                break;
-            default:
-                mMusicList = list;
-                break;
-        }
-
-        mMainHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                showContent(mMusicList);
+                webView.destroy();
+                webView = null;
             }
-        });
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initWebViewSettings(WebView webView) {
+        WebSettings webSettings = webView.getSettings();
+
+        webSettings.setJavaScriptEnabled(true);
+
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setAllowFileAccess(true);
+        webSettings.setUseWideViewPort(true);
+        webSettings.setPluginState(WebSettings.PluginState.ON);
+
+        webSettings.setUseWideViewPort(true);
+        webSettings.setLoadWithOverviewMode(true);
+
+        webSettings.setSupportZoom(false);
+        webSettings.setBuiltInZoomControls(false);
+        webSettings.setDisplayZoomControls(false);
+
+        webSettings.setDefaultTextEncodingName("UTF-8");
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            webSettings.setAllowFileAccessFromFileURLs(true);
+            webSettings.setAllowUniversalAccessFromFileURLs(true);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            CookieManager cookieManager = CookieManager.getInstance();
+            cookieManager.setAcceptThirdPartyCookies(webView, true);
+        }
+        if (NetWorkUtil.isNetworkAvailable(mContext)) {
+            webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        } else {
+            webSettings.setCacheMode(
+                    WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            webSettings.setMixedContentMode(
+                    WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
+        }
+
+        File cacheFile = new File(webView.getContext().getCacheDir(), "appcache_name");
+        String path = cacheFile.getAbsolutePath();
+
+        File file = new File(path);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+
+        webSettings = webView.getSettings();
+        webSettings.setAppCacheEnabled(true);
+        webSettings.setDatabaseEnabled(true);
+        webSettings.setDatabasePath(path);
     }
 
     private AdMobBanner adMobBanner;
@@ -208,7 +225,7 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
                     return;
                 }
 
-                if (adMobBanner != null && !adViewWrapperAdapter.isAddAdView() && adapter.getItemCount() > 4) {
+                if (adMobBanner != null && !adViewWrapperAdapter.isAddAdView()) {
                     adMobBanner.getAdView().setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT,
                             RecyclerView.LayoutParams.WRAP_CONTENT));
                     adViewWrapperAdapter.addAdView(22,
@@ -222,7 +239,7 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
     private View setUpNativeAdView(NativeAd nativeAd) {
         nativeAd.unregisterView();
 
-        View adView = LayoutInflater.from(getActivity()).inflate(R.layout.home_list_ad_item3, recycler, false);
+        View adView = LayoutInflater.from(getActivity()).inflate(R.layout.home_list_ad_item3, null, false);
 
         FrameLayout adChoicesFrame = (FrameLayout) adView.findViewById(R.id.fb_adChoices2);
         ImageView nativeAdIcon = (ImageView) adView.findViewById(R.id.image_ad);
@@ -249,37 +266,6 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
     }
 
     @Override
-    public void showContent(List<MusicListBean> musicListBean) {
-        if (musicListBean.size() == 0) {
-            errorTv.setVisibility(View.VISIBLE);
-            loadingPB.setVisibility(View.GONE);
-        } else {
-            loadingPB.setVisibility(View.GONE);
-            errorTv.setVisibility(View.GONE);
-        }
-
-        if (type == MusicFragment.SONGS_TYPE || type == MusicFragment.SONGS_SEARCH_TYPE) {
-            int positionStart = adViewWrapperAdapter.getItemCount();
-            adapter.addAll2(musicListBean);
-            NativeAd nativeAd = AdModule.getInstance().getFacebookAd().getNativeAd();
-            if (nativeAd == null || !nativeAd.isAdLoaded()) {
-                nativeAd = AdModule.getInstance().getFacebookAd().nextNativieAd();
-            }
-
-            if (nativeAd != null && nativeAd.isAdLoaded()
-                    && !adViewWrapperAdapter.isAddAdView() && adapter.getItemCount() > 4) {
-                adViewWrapperAdapter.addAdView(22,
-                        new AdViewWrapperAdapter.AdViewItem(setUpNativeAdView(nativeAd), 4));
-            }
-
-            adViewWrapperAdapter.notifyItemRangeInserted(positionStart,
-                    adViewWrapperAdapter.getItemCount());
-        } else {
-            adapter.addAll(musicListBean);
-        }
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
         if (adMobBanner != null) {
@@ -295,47 +281,13 @@ public class MusicHomeFragment extends BaseFragment<MusicHomePresenter> implemen
         }
     }
 
-    private void startChildFragment(MusicListBean musicListBean, RecyclerView.ViewHolder vh) {
-        EventUtil.sendEvent(true + "");
-        MusicDetailFragment fragment = MusicDetailFragment.newInstance(
-                musicListBean
-        );
-        // 这里是使用SharedElement的用例
-
-        // LOLLIPOP(5.0)系统的 SharedElement支持有 系统BUG， 这里判断大于 > LOLLIPOP
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-            setExitTransition(new Fade());
-            fragment.setEnterTransition(new Slide());
-            fragment.setSharedElementReturnTransition(new DetailTransition());
-            fragment.setSharedElementEnterTransition(new DetailTransition());
-
-            // 25.1.0以下的support包,Material过渡动画只有在进栈时有,返回时没有;
-            // 25.1.0+的support包，SharedElement正常
-            fragment.transaction()
-                    .addSharedElement(((MusicAdapter.MyViewHoler) vh).imageView, getString(R.string.image_transition))
-                    .commit();
-        }
-        start(fragment);
-    }
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-
-        MangoDataHandler.unRegisterAlbumDataListener();
-        MangoDataHandler.unRegisterArtistsDataListener();
-        MangoDataHandler.unRegisterSongDataListener();
 
         if (adMobBanner != null) {
             adMobBanner.destroy();
             adMobBanner = null;
         }
-    }
-
-    @Override
-    public void error(Throwable throwable) {
-        throwable.printStackTrace();
-        loadingPB.setVisibility(View.GONE);
-        errorTv.setVisibility(View.VISIBLE);
     }
 }

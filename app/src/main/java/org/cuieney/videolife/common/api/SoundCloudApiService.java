@@ -16,11 +16,7 @@ import rx.Observable;
 
 public interface SoundCloudApiService {
 
-    String CLIENT_ID = "LegNTza81OuwVaDfYELQW1X71tY1sot8";
 
-    @GET("playlists?limit=100&client_id=" + CLIENT_ID)
-    Observable<List<MusicListBean>> getMusicList();
-
-    @GET("tracks?limit=100&client_id=" + CLIENT_ID)
+    @GET("api/search.php")
     Observable<List<MusicListBean>> getSearchMusicList(@Query("q") String query);
 }

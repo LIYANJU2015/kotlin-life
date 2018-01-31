@@ -16,42 +16,18 @@ import java.util.List;
 
 public class MusicListBean implements Parcelable {
 
+    public String id;
+    public String audiodownload;
+    public String shareurl;
+    public String duration;
+    public String artist_name = "";
+    public String album_name;
+    public String license_ccurl;
+    public String image = "";
+    public String name;
 
-    private String title;
-    private String description;
-    private String artwork_url;
-    private List<TracksBean> tracks = new ArrayList<>();
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setArtwork_url(String artwork_url) {
-        this.artwork_url = artwork_url;
-    }
-
-    public String getMname() {
-        return title;
-    }
-
-    public String getMdesc() {
-        return description;
-    }
-
-    public String getOphoto() {
-        return artwork_url;
-    }
-
-    public List<TracksBean> getTracks() {
-        return tracks;
-    }
-
-    public void setTracks(List<TracksBean> tracks) {
-        this.tracks = tracks;
+    public MusicListBean() {
     }
 
     @Override
@@ -61,24 +37,30 @@ public class MusicListBean implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.title);
-        dest.writeString(this.description);
-        dest.writeString(this.artwork_url);
-        dest.writeList(this.tracks);
-    }
-
-    public MusicListBean() {
+        dest.writeString(this.id);
+        dest.writeString(this.audiodownload);
+        dest.writeString(this.shareurl);
+        dest.writeString(this.duration);
+        dest.writeString(this.artist_name);
+        dest.writeString(this.album_name);
+        dest.writeString(this.license_ccurl);
+        dest.writeString(this.image);
+        dest.writeString(this.name);
     }
 
     protected MusicListBean(Parcel in) {
-        this.title = in.readString();
-        this.description = in.readString();
-        this.artwork_url = in.readString();
-        this.tracks = new ArrayList<TracksBean>();
-        in.readList(this.tracks, TracksBean.class.getClassLoader());
+        this.id = in.readString();
+        this.audiodownload = in.readString();
+        this.shareurl = in.readString();
+        this.duration = in.readString();
+        this.artist_name = in.readString();
+        this.album_name = in.readString();
+        this.license_ccurl = in.readString();
+        this.image = in.readString();
+        this.name = in.readString();
     }
 
-    public static final Parcelable.Creator<MusicListBean> CREATOR = new Parcelable.Creator<MusicListBean>() {
+    public static final Creator<MusicListBean> CREATOR = new Creator<MusicListBean>() {
         @Override
         public MusicListBean createFromParcel(Parcel source) {
             return new MusicListBean(source);

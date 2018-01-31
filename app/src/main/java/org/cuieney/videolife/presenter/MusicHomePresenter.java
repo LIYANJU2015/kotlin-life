@@ -33,15 +33,4 @@ public class MusicHomePresenter extends RxPresenter<MusicHomeContract.View> impl
         addSubscrebe(rxSubscription);
     }
 
-    @Override
-    public void getMusicData() {
-        Subscription rxSubscription = mRetrofitHelper.getMusicList()
-                .compose(RxUtil.rxSchedulerHelper())
-                .subscribe(musicListBean -> {
-                    mView.showContent(musicListBean);
-                }, throwable -> {
-                    mView.error(throwable);
-                });
-        addSubscrebe(rxSubscription);
-    }
 }

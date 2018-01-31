@@ -12,15 +12,12 @@ import java.util.List;
 
 public interface MusicHomeContract {
 
-    int SEARCH_SOUDN_CLOUD_TYPE = 11;
-
     interface View extends BaseView {
         void showContent(List<MusicListBean> musicListBean);
         void error(Throwable throwable);
     }
 
     interface Presenter extends BasePresenter<MusicHomeContract.View> {
-        void getMusicData();
         void getSearchMusicList(String query);
     }
 }

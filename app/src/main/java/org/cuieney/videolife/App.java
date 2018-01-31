@@ -25,7 +25,6 @@ import com.zhy.autolayout.config.AutoLayoutConifg;
 
 import org.cuieney.videolife.common.utils.Constants;
 import org.cuieney.videolife.common.utils.LogUtil;
-import org.cuieney.videolife.data.MangoDataHandler;
 import org.cuieney.videolife.di.component.AppComponent;
 import org.cuieney.videolife.di.component.DaggerAppComponent;
 import org.cuieney.videolife.di.module.AppModule;
@@ -168,14 +167,6 @@ public class App extends Application {
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("addShortcut", true).apply();
             addShortcut(app, MainActivity.class, getString(R.string.app_name), R.mipmap.ic_launcher);
         }
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                MangoDataHandler.init(app);
-                MangoDataHandler.initMangoData();
-            }
-        }).start();
 
         AutoLayoutConifg.getInstance().useDeviceSize();
         getScreenSize();

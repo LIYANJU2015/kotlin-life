@@ -16,36 +16,27 @@ import org.cuieney.videolife.common.utils.LogUtil;
 
 public class MusicFragment extends BaseMainFragment {
 
-    public static final int ALBUM_TYPE = 1;
-    public static final int SONGS_TYPE = 2;
-    public static final int ARTISTS_TYPE = 3;
-    public static final int ALBUM_SEARCH_TYPE = 4;
-    public static final int SONGS_SEARCH_TYPE = 5;
-    public static final int ARTISTS_SEARCH_TYPE = 6;
-
-    public static MusicFragment newInstance(int type, String query){
+    public static MusicFragment newInstance(String query){
         Bundle bundle = new Bundle();
-        bundle.putInt("type", type);
         bundle.putString("query", query);
         MusicFragment musicFragment = new MusicFragment();
         musicFragment.setArguments(bundle);
         return musicFragment;
     }
 
-    public static MusicFragment newInstance(int type){
+    public static MusicFragment newInstance(){
         Bundle bundle = new Bundle();
-        bundle.putInt("type", type);
         MusicFragment musicFragment = new MusicFragment();
         musicFragment.setArguments(bundle);
         return musicFragment;
     }
 
-    public void addSearchFragment(int type, String query) {
-        MusicHomeFragment musicFragment = (MusicHomeFragment) getChildFragmentManager().findFragmentById(R.id.search_container);
-        if (musicFragment == null || musicFragment.type != type) {
-            replaceLoadRootFragment(R.id.search_container, MusicHomeFragment.newInstance(type, query), true);
+    public void addSearchFragment(String query) {
+        MusicSearchFragment musicFragment = (MusicSearchFragment) getChildFragmentManager().findFragmentById(R.id.search_container);
+        if (musicFragment == null) {
+            replaceLoadRootFragment(R.id.search_container, MusicSearchFragment.newInstance(query), true);
         } else {
-            musicFragment.setArguments(type, query);
+            musicFragment.setArguments(query);
         }
     }
 
@@ -59,8 +50,7 @@ public class MusicFragment extends BaseMainFragment {
     public void onLazyInitView(@Nullable Bundle savedInstanceState) {
         super.onLazyInitView(savedInstanceState);
         if (savedInstanceState == null) {
-            loadRootFragment(R.id.fl_first_container, MusicHomeFragment.newInstance(getArguments().getInt("type"),
-                    getArguments().getString("query")));
+            loadRootFragment(R.id.fl_first_container, MusicHomeFragment.newInstance());
         }
     }
 }
