@@ -3,12 +3,6 @@ package org.cuieney.videolife.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
-
-import org.cuieney.videolife.entity.wyBean.TracksBean;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by cuieney on 17/2/28.

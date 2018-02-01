@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
@@ -22,7 +21,6 @@ import org.cuieney.videolife.FacebookReportUtils;
 import org.cuieney.videolife.FileDownloaderHelper;
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.entity.MusicListBean;
-import org.cuieney.videolife.entity.wyBean.TracksBean;
 
 /**
  * Created by liyanju on 2018/1/15.

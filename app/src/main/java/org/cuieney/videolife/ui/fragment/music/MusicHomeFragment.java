@@ -29,10 +29,12 @@ import com.facebook.ads.AdChoicesView;
 import com.facebook.ads.NativeAd;
 import com.google.android.gms.ads.AdListener;
 
+import org.cuieney.videolife.FileDownloaderHelper;
 import org.cuieney.videolife.R;
 import org.cuieney.videolife.common.base.BaseFragment;
 import org.cuieney.videolife.common.net.NetWorkUtil;
 import org.cuieney.videolife.common.utils.AdViewWrapperAdapter;
+import org.cuieney.videolife.common.utils.LogUtil;
 
 import java.io.File;
 
@@ -69,7 +71,7 @@ public class MusicHomeFragment extends BaseFragment {
     private View webLinear;
     private ProgressBar progressBar;
 
-    public static final String WEB_URL = "https://www.baidu.com/";
+    public static final String WEB_URL = "https://www.mp3juices.cc/";
 
     @Override
     protected void initEventAndData() {
@@ -89,7 +91,7 @@ public class MusicHomeFragment extends BaseFragment {
 
         initWebViewSettings(webView);
 
-        webView.setWebViewClient(new WebViewClient(){
+        webView.setWebViewClient(new WebViewClient() {
             @RequiresApi(api = 21)
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
@@ -133,6 +135,8 @@ public class MusicHomeFragment extends BaseFragment {
             @Override
             public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
                 String fileName  = URLUtil.guessFileName(url, contentDisposition, mimetype);
+                LogUtil.d("onDownloadStart url " + url + " fileName " + fileName);
+                FileDownloaderHelper.addDownloadTask(fileName, url);
             }
         });
 

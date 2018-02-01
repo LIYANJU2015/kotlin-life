@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.support.v4.app.NotificationCompat;
-import android.text.TextUtils;
 
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.liulishuo.filedownloader.FileDownloader;
@@ -24,7 +23,6 @@ import org.cuieney.videolife.common.utils.ToastUtil;
 import org.cuieney.videolife.common.utils.Utils;
 import org.cuieney.videolife.entity.DownloadSong;
 import org.cuieney.videolife.entity.MusicListBean;
-import org.cuieney.videolife.entity.wyBean.TracksBean;
 import org.cuieney.videolife.provider.DownloadDao;
 import org.cuieney.videolife.ui.act.MainActivity;
 
@@ -98,7 +96,7 @@ public class FileDownloaderHelper {
 
         @Override
         protected BaseNotificationItem create(BaseDownloadTask task) {
-            return new NotificationItem(task.getId(), ((TracksBean) task.getTag()).getSongname(),
+            return new NotificationItem(task.getId(), ((MusicListBean) task.getTag()).name,
                     "");
         }
 
